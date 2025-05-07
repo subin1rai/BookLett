@@ -119,5 +119,94 @@ namespace BookLibrary.Controllers
         }
 
 
+        [HttpGet("getWishlist")]
+        [Authorize(Policy = "RequireUserRole")]
+        public async Task<IActionResult> GetWishlist()
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userClaim == null)
+                return Unauthorized("Invalid! Token is missing");
+
+            var userId = Guid.Parse(userClaim.Value);
+
+            var whitelists = await _context.Whitelists
+                .Include(w => w.Book)
+                .Where(w => w.UserId == userId)
+                .ToListAsync();
+
+            var wishlistDtos = whitelists.Select(w => new BookDTO
+            {
+                BookId = w.Book.BookId,
+                Title = w.Book.Title,
+                Author = w.Book.Author,
+                Genre = w.Book.Genre,
+                ISBN = w.Book.ISBN,
+                Description = w.Book.Description,
+                Publisher = w.Book.Publisher,
+                PublicationDate = w.Book.PublicationDate,
+                Price = w.Book.Price,
+                Quantity = w.Book.Quantity,
+                Language = w.Book.Language,
+                Discount = w.Book.Discount,
+                Format = w.Book.Format,
+                ImageUrl = w.Book.ImageUrl,
+                AvailableInLibrary = w.Book.AvailableInLibrary,
+                IsOnSale = w.Book.IsOnSale
+            }).ToList();
+
+            // var userEntity = whitelists.FirstOrDefault()?.User;
+            // var userDto = userEntity == null ? null : new UserDTO
+            // {
+            //     Id = userEntity.Id,
+            //     Username = userEntity.Username,
+            //     Email = userEntity.Email,
+            //     Role = userEntity.Role
+            // };
+
+            return Ok(new
+            {
+                status = "success",
+                code = 200,
+                message = "Wishlist retrieved successfully",
+                data = wishlistDtos
+            });
+
+        }
+
+        [HttpGet("checkWishlist/{bookId}")]
+        [Authorize(Policy = "RequireUserRole")]
+        public async Task<IActionResult> CheckWishlist(Guid bookId)
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userClaim == null)
+                return Unauthorized("Invalid! Token is missing");
+
+            var userId = Guid.Parse(userClaim.Value);
+
+            var wishlist = await _context.Whitelists
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == bookId);
+
+            if (wishlist == null)
+            {
+                return Ok(new
+                {
+                    status = false,
+                    code = 200,
+                    message = "Book is not in the wishlist"
+                });
+            }
+            else
+            {
+                return Ok(new
+                {
+                    status = true,
+                    code = 200,
+                    message = "Book is in the wishlist"
+                });
+            }
+        }
+
     }
 }
