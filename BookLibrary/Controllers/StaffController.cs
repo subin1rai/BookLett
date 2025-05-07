@@ -1,5 +1,6 @@
 using BookLibrary.Data;
 using BookLibrary.DTOs.Request;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,6 +18,7 @@ namespace BookLibrary.Controllers
         }
 
         [HttpPut("verifyOrder/{id}")]
+        [Authorize(Policy = "RequireStaffRole")]
         public async Task<IActionResult> VerifyOrder(Guid id, OrderDTO orders)
         {
 
@@ -61,6 +63,7 @@ namespace BookLibrary.Controllers
             {
             // Update order status to "Completed"
                 order.Status = "Completed";
+                order.ClaimCode = null; // Clear the claim code after verification
             }
 
             _context.Orders.Add(order);

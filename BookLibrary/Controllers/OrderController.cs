@@ -156,6 +156,34 @@ namespace BookLibrary.Controllers
             });
         }
 
+        [HttpGet("all")]
+        [Authorize(Policy = "requireAdminRole")]
+        [Authorize(Policy = "requireStaffRole")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            var orders = await _context.Orders
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Book)
+                .ToListAsync();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound(new
+                {
+                    status = "error",
+                    message = "No orders found"
+                });
+            }
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Orders retrieved successfully",
+                data = orders
+            });
+        }
+
         [HttpPost("sendEmail")]
         public async Task<IActionResult> SendEmail([FromBody] EmailRequest request)
         {

@@ -84,6 +84,7 @@ builder.Services.AddAuthorization(options =>
 {
     // Policy for Admin role
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Staff"));
 
     // Policy for User role
     options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
