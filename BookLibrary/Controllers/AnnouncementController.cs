@@ -145,5 +145,31 @@ namespace BookLibrary.Controllers
             });
         }
         
+
+        [HttpDelete("delete/{announcementId}")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<ActionResult> DeleteAnnouncement(Guid announcementId)
+        {
+            var announcement = await _context.Announcements
+                .FirstOrDefaultAsync(a => a.AnnouncementId == announcementId);
+
+            if (announcement == null)
+            {
+                return NotFound(new
+                {
+                    status = "error",
+                    message = "Announcement not found"
+                });
+            }
+
+            _context.Announcements.Remove(announcement);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Announcement deleted successfully"
+            });
+        }
     }
 }
