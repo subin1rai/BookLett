@@ -54,5 +54,36 @@ namespace BookLibrary.Controllers
                 data = newAnnouncement
             });
         }
+
+        [HttpGet("active")]
+
+        public ActionResult GetActiveAnnouncement()
+        {
+            var now = DateTime.UtcNow;
+
+            var active = _context.Announcements
+                .Where(a =>
+                    a.StartTime <= now && a.EndTime >= now && a.IsPinned == true
+                )
+                .OrderByDescending(a => a.CreatedAt)
+                .FirstOrDefault();
+
+            if (active == null)
+            {
+                return Ok(new { active = false });
+            }
+
+            return Ok(new
+            {
+                active = true,
+                message = active.Message,
+                start = active.StartTime,
+                end = active.EndTime,
+                color = active.Color,    
+                textColor = active.TextColor
+            });
+        }
+
+
     }
 }
