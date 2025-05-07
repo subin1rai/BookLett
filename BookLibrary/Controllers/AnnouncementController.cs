@@ -85,5 +85,32 @@ namespace BookLibrary.Controllers
         }
 
 
+
+        [HttpGet("all")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public ActionResult GetAllAnnouncements()
+        {
+            var announcements = _context.Announcements
+                .OrderByDescending(a => a.CreatedAt)
+                .ToList();
+
+            if (announcements.Count == 0)
+            {
+                return Ok(new
+                {
+                    status = "success",
+                    message = "No announcements found",
+                    data = new List<Announcement>()
+                });
+            }
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Announcements retrieved successfully",
+                data = announcements
+            });
+        }
+
     }
 }
