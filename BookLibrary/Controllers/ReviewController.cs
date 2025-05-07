@@ -96,31 +96,31 @@ namespace BookLibrary.Controllers
             );
         }
 
-        // [HttpDelete("deleteReview/{reviewId}")]
-        // [Authorize(Policy = "RequireUserRole")]
-        // public async Task<ActionResult> DeleteReview(Guid reviewId)
-        // {
-        //     var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-        //     if (userClaim == null)
-        //         return Unauthorized("Invalid! Token is missing");
+        [HttpDelete("deleteReview/{reviewId}")]
+        [Authorize(Policy = "RequireUserRole")]
+        public async Task<ActionResult> DeleteReview(Guid reviewId)
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userClaim == null)
+                return Unauthorized("Invalid! Token is missing");
 
-        //     var userId = Guid.Parse(userClaim.Value);
+            var userId = Guid.Parse(userClaim.Value);
 
-        //     var review = await _context.Reviews.FindAsync(reviewId);
-        //     if (review == null)
-        //         return NotFound("Review not found");
+            var review = await _context.Reviews.FindAsync(reviewId);
+            if (review == null)
+                return NotFound("Review not found");
 
-        //     if (review.UserId != userId)
-        //         return Forbid("You are not authorized to delete this review.");
+            if (review.UserId != userId)
+                return Forbid("You are not authorized to delete this review.");
 
-        //     _context.Reviews.Remove(review);
-        //     await _context.SaveChangesAsync();
+            _context.Reviews.Remove(review);
+            await _context.SaveChangesAsync();
 
-        //     return Ok(new
-        //     {
-        //         StatusCode = 200,
-        //         Message = "Review deleted successfully."
-        //     });
-        // }
+            return Ok(new
+            {
+                StatusCode = 200,
+                Message = "Review deleted successfully."
+            });
+        }
     }
 }
