@@ -1,0 +1,217 @@
+using System.Security.Claims;
+using BookLibrary.Data;
+using BookLibrary.DTOs.Request;
+using BookLibrary.DTOs.Response;
+using BookLibrary.Model;
+using BookLibrary.Service;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace BookLibrary.Controllers
+{
+    [Route("api/bookcrud")]
+    [ApiController]
+    public class BookController : ControllerBase
+    {
+        private readonly AuthDbContext _context;
+
+        public BookController(AuthDbContext context)
+        {
+            _context = context;
+        }
+
+
+        [HttpPost("create")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> CreateBook(
+            [FromForm] CreateBookDTO createBook,
+            IFormFile image,
+            [FromServices] CloudinaryService cloudinaryService)
+        {
+            if (await _context.Books.AnyAsync(b => b.Title == createBook.Title || b.ISBN == createBook.ISBN))
+            {
+                return BadRequest("Book with same title or ISBN already exists.");
+            }
+
+            string imageUrl = null;
+            if (image != null)
+            {
+                imageUrl = await cloudinaryService.UploadImageAsync(image);
+            }
+
+            var book = new Book
+            {
+                BookId = Guid.NewGuid(),
+                Title = createBook.Title,
+                Author = createBook.Author,
+                Genre = createBook.Genre,
+                ISBN = createBook.ISBN,
+                Description = createBook.Description,
+                Publisher = createBook.Publisher,
+                PublicationDate = createBook.PublicationDate,
+                Price = createBook.Price,
+                Quantity = createBook.Quantity,
+                ImageUrl = imageUrl,
+                Language = createBook.Language,
+                Discount = createBook.Discount,
+                Format = createBook.Format,
+                AvailableInLibrary = true,
+                IsOnSale = false
+            };
+
+            _context.Books.Add(book);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                message = "Book created successfully",
+                data = book
+            });
+        }
+
+        [HttpGet("getallbooks")]
+
+        public async Task<ActionResult<IEnumerable<BookDTO>>> GetAllBooks()
+        {
+            var books = await _context.Books.ToListAsync();
+            var bookDtos = books.Select(b => new BookDTO
+            {
+                BookId = b.BookId,
+                Title = b.Title,
+                Author = b.Author,
+                Genre = b.Genre,
+                ISBN = b.ISBN,
+                Description = b.Description,
+                Publisher = b.Publisher,
+                PublicationDate = b.PublicationDate,
+                Price = b.Price,
+                Quantity = b.Quantity,
+                Language = b.Language,
+                Discount = b.Discount,
+                Format = b.Format,
+                ImageUrl = b.ImageUrl,
+                AvailableInLibrary = b.AvailableInLibrary,
+                IsOnSale = b.IsOnSale
+            }).ToList();
+
+            return Ok(bookDtos);
+        }
+
+        [HttpGet("getbookbyid/{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
+
+        public async Task<ActionResult<BookDTO>> GetUserById(Guid id)
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userClaim == null) return Unauthorized("Invalid !! Token is missing");
+
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound("Book not found");
+            }
+            var bookDto = new BookDTO
+            {
+                BookId = book.BookId,
+                Title = book.Title,
+                Author = book.Author,
+                Genre = book.Genre,
+                ISBN = book.ISBN,
+                Description = book.Description,
+                Publisher = book.Publisher,
+                PublicationDate = book.PublicationDate,
+                Price = book.Price,
+                Language = book.Language,
+                Discount = book.Discount,
+                Format = book.Format,
+                Quantity = book.Quantity,
+                ImageUrl = book.ImageUrl,
+                AvailableInLibrary = book.AvailableInLibrary,
+                IsOnSale = book.IsOnSale
+            };
+            return Ok(new
+            {
+                status = "success",
+                message = "Book found",
+                data = bookDto
+            });
+        }
+
+        [HttpPut("updatebook/{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> UpdateBook(Guid id, [FromForm] CreateBookDTO updateBook, IFormFile image)
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound("Book not found");
+            }
+
+            // Upload the image
+            string imageUrl = null;
+            if (image != null && image.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await image.CopyToAsync(stream);
+                }
+
+                imageUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+            }
+
+            book.Title = updateBook.Title ?? book.Title;
+            book.Author = updateBook.Author ?? book.Author;
+            book.Genre = updateBook.Genre ?? book.Genre;
+            book.ISBN = updateBook.ISBN;
+            book.Description = updateBook.Description;
+            book.Language = updateBook.Language;
+            book.Discount = updateBook.Discount;
+            book.Format = updateBook.Format;
+            book.Publisher = updateBook.Publisher;
+            book.PublicationDate = updateBook.PublicationDate;
+            book.Price = updateBook.Price;
+            book.Quantity = updateBook.Quantity;
+            book.ImageUrl = imageUrl ?? book.ImageUrl; // Keep the old image URL if no new image is provided
+
+            _context.Books.Update(book);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Book updated successfully",
+                data = book
+            });
+        }
+        [HttpDelete("deletebook/{id}")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<IActionResult> DeleteBook(Guid id)
+        {
+            var book = await _context.Books.FindAsync(id);
+            if (book == null)
+            {
+                return NotFound("Book not found");
+            }
+
+            _context.Books.Remove(book);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Book deleted successfully"
+            });
+        }
+
+
+    }
+}
