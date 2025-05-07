@@ -1,0 +1,77 @@
+using BookLibrary.Data;
+using BookLibrary.DTOs.Request;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace BookLibrary.Controllers
+{
+    [Route("api/staff")]
+    [ApiController]
+    public class StaffController : ControllerBase
+    {
+        public readonly AuthDbContext _context;
+
+        public StaffController(AuthDbContext context)
+        {
+            _context = context;
+        }
+
+        [HttpPut("verifyOrder/{id}")]
+        public async Task<IActionResult> VerifyOrder(Guid id, OrderDTO orders)
+        {
+
+            if(orders.ClaimCode == null)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    message = "Claim code is required"
+                });
+            }
+
+            var order = await _context.Orders.FindAsync(id);
+            if (order == null)
+            {
+                return NotFound(new
+                {
+                    status = "error",
+                    message = "Order not found"
+                });
+            }
+
+            if(order.ClaimCode != orders.ClaimCode)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    message = "Invalid claim code"
+                });
+            }
+
+            if (order.Status == "Completed")
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    message = "Order already completed"
+                });
+            }
+
+            if(order.ClaimCode == orders.ClaimCode)
+            {
+            // Update order status to "Completed"
+                order.Status = "Completed";
+            }
+
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Order verified successfully",
+                data = order
+            });
+        }
+    }
+}
