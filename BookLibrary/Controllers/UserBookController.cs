@@ -207,6 +207,38 @@ namespace BookLibrary.Controllers
                 });
             }
         }
+        [HttpDelete("remove/{bookId}")]
+        [Authorize(Policy = "RequireUserRole")]
+        public async Task<IActionResult> RemoveWishlist(Guid bookId)
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
+            if (userClaim == null)
+                return Unauthorized("Invalid! Token is missing");
+
+            var userId = Guid.Parse(userClaim.Value);
+
+            var wishlist = await _context.Whitelists
+            .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == bookId);
+
+            if (wishlist == null)
+            {
+                return Ok(new
+                {
+                    status = false,
+                    code = 200,
+                    message = "Book is not in the wishlist"
+                });
+            }
+
+            _context.Whitelists.Remove(wishlist);
+            await _context.SaveChangesAsync();
+            return Ok(new
+            {
+                status = true,
+                statusCode = 200,
+                message = "Book removed from wishlist successfully"
+            });
+        }
     }
 }
