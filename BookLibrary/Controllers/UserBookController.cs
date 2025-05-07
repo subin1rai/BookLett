@@ -80,5 +80,44 @@ namespace BookLibrary.Controllers
                 data = bookDtos
             });
         }
+
+        [HttpPost("addWishlist")]
+        [Authorize(Policy = "RequireUserRole")]
+        public async Task<IActionResult> BookmarkBook(CreateWhitelistDTO dto)
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+            if (userClaim == null)
+                return Unauthorized("Invalid! Token is missing");
+
+            var userId = Guid.Parse(userClaim.Value); // Assuming your UserId is Guid
+
+            var exists = await _context.Whitelists
+                .AnyAsync(w => w.UserId == userId && w.BookId == dto.BookId);
+
+            if (exists)
+                return BadRequest("Already bookmarked");
+
+            var whitelist = new WhiteList
+            {
+                UserId = userId,
+                BookId = dto.BookId,
+                BookmarkedAt = DateTime.UtcNow
+            };
+
+            _context.Whitelists.Add(whitelist);
+            await _context.SaveChangesAsync();
+
+            return Ok(
+                new
+                {
+                    status = true,
+                    statusCode = 200,
+                    message = "Bookmarked successfully"
+                }
+            );
+        }
+
+
     }
 }
