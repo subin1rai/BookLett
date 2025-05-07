@@ -112,5 +112,38 @@ namespace BookLibrary.Controllers
             });
         }
 
+        [HttpPut("update/{announcementId}")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<ActionResult> UpdateAnnouncement(Guid announcementId, AnnouncementDTO announcement)
+        {
+            var existingAnnouncement = await _context.Announcements
+                .FirstOrDefaultAsync(a => a.AnnouncementId == announcementId);
+
+            if (existingAnnouncement == null)
+            {
+                return NotFound(new
+                {
+                    status = "error",
+                    message = "Announcement not found"
+                });
+            }
+
+            existingAnnouncement.Message = announcement.Message;
+            existingAnnouncement.StartTime = announcement.StartTime;
+            existingAnnouncement.EndTime = announcement.EndTime;
+            existingAnnouncement.Color = announcement.Color;
+            existingAnnouncement.TextColor = announcement.TextColor;
+            existingAnnouncement.IsPinned = announcement.IsPinned ? true : false;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Announcement updated successfully",
+                data = existingAnnouncement
+            });
+        }
+        
     }
 }
