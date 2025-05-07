@@ -240,5 +240,40 @@ namespace BookLibrary.Controllers
                 message = "Book removed from wishlist successfully"
             });
         }
+
+        [HttpGet("bookByAuthor/{name}")]
+        public async Task<ActionResult<IEnumerable<BookDTO>>> GetBooksByAuthor(string name)
+        {
+            var books = await _context.Books
+                .Where(b => b.Author.Contains(name))
+                .ToListAsync();
+
+            if (books == null || books.Count == 0)
+            {
+                return NotFound("No books found for the given author.");
+            }
+
+            var bookDtos = books.Select(b => new BookDTO
+            {
+                BookId = b.BookId,
+                Title = b.Title,
+                Author = b.Author,
+                Genre = b.Genre,
+                ISBN = b.ISBN,
+                Description = b.Description,
+                Publisher = b.Publisher,
+                PublicationDate = b.PublicationDate,
+                Price = b.Price,
+                Quantity = b.Quantity,
+                Language = b.Language,
+                Discount = b.Discount,
+                Format = b.Format,
+                ImageUrl = b.ImageUrl,
+                AvailableInLibrary = b.AvailableInLibrary,
+                IsOnSale = b.IsOnSale
+            }).ToList();
+
+            return Ok(bookDtos);
+        }
     }
 }
