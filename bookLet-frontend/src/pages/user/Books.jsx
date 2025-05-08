@@ -20,16 +20,35 @@ const BookList = () => {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const { data } = await apiClient.get(
-        `/book/all?page=${page}&pageSize=${pageSize}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // Map sort values
+      let sortBy = "title";
+      let sortDesc = false;
+      if (selectedSort === "price-low-high") {
+        sortBy = "price";
+      } else if (selectedSort === "price-high-low") {
+        sortBy = "price";
+        sortDesc = true;
+      } else if (selectedSort === "newest") {
+        sortBy = "createdAt";
+        sortDesc = true;
+      }
 
-      setAllBooks(data.data); // books array
+      // Construct query params
+      const params = new URLSearchParams({
+        page,
+        pageSize,
+        ...(selectedGenres.length > 0 && { genre: selectedGenres[0] }), // supports only 1 genre for now
+        sortBy,
+        sortDesc,
+      });
+
+      const { data } = await apiClient.get(`/book/all?${params.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setAllBooks(data.data);
       setTotalPages(data.pagination?.totalPages || 1);
       setTotalItems(data.pagination?.totalItems || 0);
     } catch (error) {
@@ -41,7 +60,7 @@ const BookList = () => {
 
   useEffect(() => {
     fetchBooks();
-  }, [page]);
+  }, [page, selectedGenres, selectedSort]);
 
   return loading ? (
     <Loading />
