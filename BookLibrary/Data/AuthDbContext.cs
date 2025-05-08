@@ -17,6 +17,8 @@ public class AuthDbContext : DbContext
         public DbSet<Order> Orders { get; set; }
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
+        public DbSet<Notification>  Notifications { get; set; }
+
         public DbSet<Rating> Reviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

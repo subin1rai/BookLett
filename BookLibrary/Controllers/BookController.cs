@@ -7,6 +7,7 @@ using BookLibrary.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace BookLibrary.Controllers
@@ -16,12 +17,13 @@ namespace BookLibrary.Controllers
     public class BookController : ControllerBase
     {
         private readonly AuthDbContext _context;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public BookController(AuthDbContext context)
+        public BookController(AuthDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
         }
-
 
         [HttpPost("create")]
         [Authorize(Policy = "RequireAdminRole")]
@@ -63,6 +65,7 @@ namespace BookLibrary.Controllers
 
             _context.Books.Add(book);
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Admin", $"New book added! {book.Title}");
 
             return Ok(new
             {
@@ -95,7 +98,6 @@ namespace BookLibrary.Controllers
                 AvailableInLibrary = b.AvailableInLibrary,
                 IsOnSale = b.IsOnSale
             }).ToList();
-
             return Ok(bookDtos);
         }
 

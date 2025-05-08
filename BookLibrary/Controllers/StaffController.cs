@@ -1,8 +1,11 @@
 using BookLibrary.Data;
 using BookLibrary.DTOs.Request;
+using BookLibrary.Model;
+using BookLibrary.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BookLibrary.Controllers
 {
@@ -10,19 +13,24 @@ namespace BookLibrary.Controllers
     [ApiController]
     public class StaffController : ControllerBase
     {
-        public readonly AuthDbContext _context;
+        public readonly AuthDbContext _context;        
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public StaffController(AuthDbContext context)
+
+
+        public StaffController(AuthDbContext context,IHubContext<NotificationHub> hubContext)
         {
             _context = context;
+            _hubContext = hubContext;
+
         }
 
         [HttpPut("verifyOrder/{id}")]
-        [Authorize(Policy = "RequireStaffRole")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> VerifyOrder(Guid id, OrderDTO orders)
         {
 
-            if(orders.ClaimCode == null)
+            if (orders.ClaimCode == null)
             {
                 return BadRequest(new
                 {
@@ -32,6 +40,7 @@ namespace BookLibrary.Controllers
             }
 
             var order = await _context.Orders.FindAsync(id);
+            var user = await _context.Users.FindAsync(order.UserId);
             if (order == null)
             {
                 return NotFound(new
@@ -41,7 +50,7 @@ namespace BookLibrary.Controllers
                 });
             }
 
-            if(order.ClaimCode != orders.ClaimCode)
+            if (order.ClaimCode != orders.ClaimCode)
             {
                 return BadRequest(new
                 {
@@ -59,14 +68,19 @@ namespace BookLibrary.Controllers
                 });
             }
 
-            if(order.ClaimCode == orders.ClaimCode)
+            if (order.ClaimCode == orders.ClaimCode)
             {
-            // Update order status to "Completed"
+                // Update order status to "Completed"
                 order.Status = "Completed";
                 order.ClaimCode = null; // Clear the claim code after verification
             }
 
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Purchased Book", $"{user.Username} has purchased the book!");
+            var addNotification = new Notification{
+                message= $"{user.Username} has purchased the book!"
+            };  
             _context.Orders.Add(order);
+            _context.Notifications.Add(addNotification); 
             await _context.SaveChangesAsync();
 
             return Ok(new
@@ -76,5 +90,7 @@ namespace BookLibrary.Controllers
                 data = order
             });
         }
+        
+
     }
 }

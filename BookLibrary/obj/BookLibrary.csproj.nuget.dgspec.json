@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\subin\\Desktop\\ADCW2\\BookLibrary\\BookLibrary\\BookLibrary.csproj": {}
+    "C:\\Users\\subin\\Desktop\\BookLett\\BookLibrary\\BookLibrary.csproj": {}
   },
   "projects": {
-    "C:\\Users\\subin\\Desktop\\ADCW2\\BookLibrary\\BookLibrary\\BookLibrary.csproj": {
+    "C:\\Users\\subin\\Desktop\\BookLett\\BookLibrary\\BookLibrary.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\subin\\Desktop\\ADCW2\\BookLibrary\\BookLibrary\\BookLibrary.csproj",
+        "projectUniqueName": "C:\\Users\\subin\\Desktop\\BookLett\\BookLibrary\\BookLibrary.csproj",
         "projectName": "BookLibrary",
-        "projectPath": "C:\\Users\\subin\\Desktop\\ADCW2\\BookLibrary\\BookLibrary\\BookLibrary.csproj",
+        "projectPath": "C:\\Users\\subin\\Desktop\\BookLett\\BookLibrary\\BookLibrary.csproj",
         "packagesPath": "C:\\Users\\subin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\subin\\Desktop\\ADCW2\\BookLibrary\\BookLibrary\\obj\\",
+        "outputPath": "C:\\Users\\subin\\Desktop\\BookLett\\BookLibrary\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -66,6 +66,10 @@
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
               "version": "[8.0.15, )"
+            },
+            "Microsoft.AspNetCore.SignalR.Client": {
+              "target": "Package",
+              "version": "[9.0.4, )"
             },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",

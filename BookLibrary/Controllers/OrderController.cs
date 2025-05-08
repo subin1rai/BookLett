@@ -3,6 +3,7 @@ using BookLibrary.Model;
 using BookLibrary.Service;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
@@ -14,11 +15,14 @@ namespace BookLibrary.Controllers
     {
         private readonly AuthDbContext _context;
         private readonly IEmailService _emailService;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public OrderController(AuthDbContext context, IEmailService emailService)
+
+        public OrderController(AuthDbContext context, IEmailService emailService, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
             _emailService = emailService;
+            _hubContext = hubContext;
         }
 
         // Place Order - Accessible to Users

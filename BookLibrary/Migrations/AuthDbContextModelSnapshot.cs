@@ -159,6 +159,24 @@ namespace BookLibrary.Migrations
                     b.ToTable("CartItems");
                 });
 
+            modelBuilder.Entity("BookLibrary.Model.Notification", b =>
+                {
+                    b.Property<Guid>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("NotificationId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("BookLibrary.Model.Order", b =>
                 {
                     b.Property<Guid>("OrderId")
