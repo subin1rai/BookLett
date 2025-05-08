@@ -13,12 +13,12 @@ namespace BookLibrary.Controllers
     [ApiController]
     public class StaffController : ControllerBase
     {
-        public readonly AuthDbContext _context;        
+        public readonly AuthDbContext _context;
         private readonly IHubContext<NotificationHub> _hubContext;
 
 
 
-        public StaffController(AuthDbContext context,IHubContext<NotificationHub> hubContext)
+        public StaffController(AuthDbContext context, IHubContext<NotificationHub> hubContext)
         {
             _context = context;
             _hubContext = hubContext;
@@ -76,21 +76,21 @@ namespace BookLibrary.Controllers
             }
 
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Purchased Book", $"{user.Username} has purchased the book!");
-            var addNotification = new Notification{
-                message= $"{user.Username} has purchased the book!"
-            };  
-            _context.Orders.Add(order);
-            _context.Notifications.Add(addNotification); 
+            var addNotification = new Notification
+            {
+                message = $"{user.Username} has purchased the book!"
+            };
+            _context.Orders.Update(order); 
+            _context.Notifications.Add(addNotification);
             await _context.SaveChangesAsync();
 
             return Ok(new
             {
                 status = "success",
-                message = "Order verified successfully",
-                data = order
+                message = "Order verified successfully"
             });
         }
-        
+
 
     }
 }
