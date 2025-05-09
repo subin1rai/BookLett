@@ -73,6 +73,7 @@ namespace BookLibrary.Controllers
                 // Update order status to "Completed"
                 order.Status = "Completed";
                 order.ClaimCode = null; // Clear the claim code after verification
+
             }
 
             await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Purchased Book", $"{user.Username} has purchased the book!");

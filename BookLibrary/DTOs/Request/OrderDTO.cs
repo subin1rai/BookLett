@@ -5,6 +5,7 @@ namespace BookLibrary.DTOs.Request;
 public class OrderDTO
 {
     public Guid UserId { get; set; }
+    public Guid BookId { get; set; }
 
     public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 

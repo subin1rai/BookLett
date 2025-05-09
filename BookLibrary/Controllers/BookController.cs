@@ -214,6 +214,33 @@ namespace BookLibrary.Controllers
             });
         }
 
+        // timestamp and discount create  
+        [HttpPut("discountOffer/{bookid}")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<ActionResult> DiscountOffer(Guid bookid, DiscountDTO discount)
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userClaim == null) return Unauthorized("Invalid !! Token is missing");
+
+            var bookDetails = await _context.Books.FindAsync(bookid);
+            if (bookDetails != null)
+            {
+
+                bookDetails.Discount = discount.Discount;
+                bookDetails.StartTime = discount.StartTime;
+                bookDetails.EndTime = discount.EndTime;
+                bookDetails.IsOnSale = discount.IsOnSale;
+            }
+
+            _context.Books.Update(bookDetails);
+            await _context.SaveChangesAsync();
+            return Ok(new
+            {
+                status = "success",
+                message = "Discount added successfully"
+            });
+        }
+
 
     }
 }
