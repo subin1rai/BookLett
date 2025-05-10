@@ -4,6 +4,7 @@ namespace BookLibrary.DTOs.Request;
 
 public class OrderDTO
 {
+    public Guid OrderId { get; set; }
     public Guid UserId { get; set; }
     public Guid BookId { get; set; }
 
@@ -16,6 +17,11 @@ public class OrderDTO
 
     public string Status { get; set; } = "Pending";
     public string? ClaimCode { get; set; }
-    
-    public OrderItemDTO orderItem { get; set; } = new OrderItemDTO();
+
+    public List<OrderItemDTO> OrderItems { get; set; } = new();
+
+    public string Username { get; set; }
+    public List<string> BookTitles { get; set; }
 }
+
+

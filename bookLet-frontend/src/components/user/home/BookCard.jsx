@@ -8,26 +8,22 @@ import { AppContext } from "../../../context/AppContext";
 
 const BookCard = ({ book }) => {
   const [wish, setWish] = useState(false);
-  const { addToCart, fetchWishlist, setWishlist, checkLogged } =
-    useContext(AppContext);
-console.log(book)
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [showSale, setShowSale] = useState(false);
+  const { addToCart, fetchWishlist, setWishlist, checkLogged } = useContext(AppContext);
+
   const token = localStorage.getItem("token");
   const bookId = book.bookId;
+
   const checkWish = async () => {
     try {
-      console.log(bookId);
       const { data } = await apiClient.get(`/book/checkWishlist/${bookId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
       });
-      console.log(data);
-      if (data.status) {
-        setWish(true);
-      } else {
-        setWish(false);
-      }
+      setWish(data.status);
     } catch (error) {
       console.error("Error checking wishlist:", error);
     }
@@ -35,13 +31,10 @@ console.log(book)
 
   const addCart = async () => {
     try {
-      const data = {
-        bookId,
-        quantity: 1,
-      };
+      const data = { bookId, quantity: 1 };
       addToCart(data);
-    } catch (error) {
-      toast.error("Failed to Add")
+    } catch {
+      toast.error("Failed to Add");
     }
   };
 
@@ -57,8 +50,7 @@ console.log(book)
           },
         }
       );
-
-      if (data.statusCode == 200) {
+      if (data.statusCode === 200) {
         toast.success("Bookmarked Successfully");
         await checkWish();
         fetchWishlist();
@@ -81,9 +73,9 @@ console.log(book)
           },
         }
       );
-      setWish(false);
-      if (data.statusCode == 200) {
+      if (data.statusCode === 200) {
         toast.success("Removed from Wishlist");
+        setWish(false);
         setWishlist((prev) => prev.filter((b) => b.bookId !== bookId));
       }
     } catch (error) {
@@ -91,6 +83,41 @@ console.log(book)
       toast.error("Failed to remove from wishlist");
     }
   };
+
+  // On Sale Countdown Logic
+  useEffect(() => {
+    if (book.isOnSale && book.startTime && book.endTime) {
+      const now = new Date().getTime();
+      const start = new Date(book.startTime).getTime();
+      const end = new Date(book.endTime).getTime();
+
+      if (now >= start && now < end) {
+        setShowSale(true);
+
+        const interval = setInterval(() => {
+          const now = new Date().getTime();
+          const distance = end - now;
+
+          if (distance <= 0) {
+            setShowSale(false);
+            setTimeLeft(null);
+            clearInterval(interval);
+          } else {
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            setTimeLeft(
+              `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
+                seconds
+              ).padStart(2, "0")}`
+            );
+          }
+        }, 1000);
+
+        return () => clearInterval(interval);
+      }
+    }
+  }, [book.isOnSale, book.startTime, book.endTime]);
 
   useEffect(() => {
     if (checkLogged()) {
@@ -100,14 +127,24 @@ console.log(book)
 
   return (
     <div className="flex flex-col w-[255px] pb-8">
-      <div className="relative mb-2">
+      <div className="relative mb-2 ">
         <Link to={`/bookDetails/${book.bookId}`} state={{ book }}>
           <img
-            src={book.imageUrl? book.imageUrl : images.book1}
+            src={book.imageUrl ? book.imageUrl : images.book1}
             alt={book.title}
             className="w-full h-[386px] object-cover rounded-[20px]"
           />
         </Link>
+
+        {/* Show dynamic On Sale badge with countdown */}
+        {showSale && timeLeft && (
+          
+          <div className="absolute top-0 rounded-br-2xl rounded-tl-2xl h-10 bg-web-primary ">
+            <img src={images.sale1} alt="" className="w-16 absolute z-40"  />
+            <h1 className="text-lg font-semibold text-web-offer pl-9 p-2 ">{timeLeft}</h1>
+          </div>
+        )}
+
         <div className="absolute top-2 right-2 rounded-full h-10 bg-web-background p-2">
           {wish ? (
             <button onClick={removeWish}>
@@ -142,16 +179,12 @@ console.log(book)
 
       {/* Price */}
       <div className="mb-2">
-        <div className="text-xs text-gray-500 line-through">
-          Rs {book.price} mrp
-        </div>
+        <div className="text-xs text-gray-500 line-through">Rs {book.price}</div>
         <div className="flex justify-between items-center">
           <span className="font-bold">
             Rs {book.price - (book.discount * book.price) / 100}
           </span>
-          <span className="text-orange-500 font-bold">
-            {book.discount}% Off
-          </span>
+          <span className="text-orange-500 font-bold">{book.discount}% Off</span>
         </div>
       </div>
 

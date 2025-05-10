@@ -11,11 +11,14 @@ import addtoCart from "./images/addtocart.png";
 import banner from "./images/banner.png";
 import page from "./images/page.png";
 import vector from "./images/vector.png";
+import sale1 from "./images/sale.jpg";
+import sale2 from "./images/sale2.png";
 
 const images = {
   logo,
   shoppingBag,
-  wishList,
+  wishList,sale1,
+  sale2,
   arrow,
   user_icon,
   herobook,
