@@ -23,100 +23,100 @@ namespace BookLibrary.Controllers
 
 
         //pagination implemented 
-       [HttpGet("all")]
-public async Task<ActionResult> GetAllBooks(
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? search = null,
-    [FromQuery] string? genre = null,
-    [FromQuery] string? author = null,
-    [FromQuery] string? sortBy = "title",  // e.g., title, price, createdAt
-    [FromQuery] bool sortDesc = false)
-{
-    if (page <= 0 || pageSize <= 0)
-    {
-        return BadRequest(new
+        [HttpGet("all")]
+        public async Task<ActionResult> GetAllBooks(
+     [FromQuery] int page = 1,
+     [FromQuery] int pageSize = 10,
+     [FromQuery] string? search = null,
+     [FromQuery] string? genre = null,
+     [FromQuery] string? author = null,
+     [FromQuery] string? sortBy = "title",  // e.g., title, price, createdAt
+     [FromQuery] bool sortDesc = false)
         {
-            status = "error",
-            code = 400,
-            message = "Page and pageSize must be greater than 0"
-        });
-    }
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    code = 400,
+                    message = "Page and pageSize must be greater than 0"
+                });
+            }
 
-    // Start with all books
-    IQueryable<Book> query = _context.Books;
+            // Start with all books
+            IQueryable<Book> query = _context.Books;
 
-    // Apply search (in title or author)
-    if (!string.IsNullOrWhiteSpace(search))
-    {
-        query = query.Where(b =>
-            b.Title.ToLower().Contains(search.ToLower()) ||
-            b.Author.ToLower().Contains(search.ToLower()));
-    }
+            // Apply search (in title or author)
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(b =>
+                    b.Title.ToLower().Contains(search.ToLower()) ||
+                    b.Author.ToLower().Contains(search.ToLower()));
+            }
 
- 
-    if (!string.IsNullOrWhiteSpace(genre))
-    {
-        query = query.Where(b => b.Genre.ToLower() == genre.ToLower());
-    }
 
-    if (!string.IsNullOrWhiteSpace(author))
-    {
-        query = query.Where(b => b.Author.ToLower() == author.ToLower());
-    }
+            if (!string.IsNullOrWhiteSpace(genre))
+            {
+                query = query.Where(b => b.Genre.ToLower() == genre.ToLower());
+            }
 
-    // Apply sorting
-    query = sortBy.ToLower() switch
-    {
-        "price" => sortDesc ? query.OrderByDescending(b => b.Price) : query.OrderBy(b => b.Price),
-        "createdat" => sortDesc ? query.OrderByDescending(b => b.CreatedAt) : query.OrderBy(b => b.CreatedAt),
-        _ => sortDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title)
-    };
+            if (!string.IsNullOrWhiteSpace(author))
+            {
+                query = query.Where(b => b.Author.ToLower() == author.ToLower());
+            }
 
-    var totalBooks = await query.CountAsync();
-    var totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
+            // Apply sorting
+            query = sortBy.ToLower() switch
+            {
+                "price" => sortDesc ? query.OrderByDescending(b => b.Price) : query.OrderBy(b => b.Price),
+                "createdat" => sortDesc ? query.OrderByDescending(b => b.CreatedAt) : query.OrderBy(b => b.CreatedAt),
+                _ => sortDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title)
+            };
 
-    var books = await query
-        .Skip((page - 1) * pageSize)
-        .Take(pageSize)
-        .ToListAsync();
+            var totalBooks = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
 
-    var bookDtos = books.Select(b => new BookDTO
-    {
-        BookId = b.BookId,
-        Title = b.Title,
-        Author = b.Author,
-        Genre = b.Genre,
-        ISBN = b.ISBN,
-        Description = b.Description,
-        Publisher = b.Publisher,
-        PublicationDate = b.PublicationDate,
-        Price = b.Price,
-        Quantity = b.Quantity,
-        Language = b.Language,
-        Discount = b.Discount,
-        Format = b.Format,
-        ImageUrl = b.ImageUrl,
-        AvailableInLibrary = b.AvailableInLibrary,
-        IsOnSale = b.IsOnSale,
-        CreatedAt = b.CreatedAt
-    }).ToList();
+            var books = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
 
-    return Ok(new
-    {
-        status = "success",
-        code = 200,
-        message = "Books retrieved successfully",
-        pagination = new
-        {
-            currentPage = page,
-            pageSize = pageSize,
-            totalPages = totalPages,
-            totalItems = totalBooks
-        },
-        data = bookDtos
-    });
-}
+            var bookDtos = books.Select(b => new BookDTO
+            {
+                BookId = b.BookId,
+                Title = b.Title,
+                Author = b.Author,
+                Genre = b.Genre,
+                ISBN = b.ISBN,
+                Description = b.Description,
+                Publisher = b.Publisher,
+                PublicationDate = b.PublicationDate,
+                Price = b.Price,
+                Quantity = b.Quantity,
+                Language = b.Language,
+                Discount = b.Discount,
+                Format = b.Format,
+                ImageUrl = b.ImageUrl,
+                AvailableInLibrary = b.AvailableInLibrary,
+                IsOnSale = b.IsOnSale,
+                CreatedAt = b.CreatedAt
+            }).ToList();
+
+            return Ok(new
+            {
+                status = "success",
+                code = 200,
+                message = "Books retrieved successfully",
+                pagination = new
+                {
+                    currentPage = page,
+                    pageSize = pageSize,
+                    totalPages = totalPages,
+                    totalItems = totalBooks
+                },
+                data = bookDtos
+            });
+        }
 
 
         [HttpPost("addWishlist")]

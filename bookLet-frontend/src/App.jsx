@@ -20,6 +20,7 @@ import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffOrder from "./pages/staff/StaffOrder";
 import BookDetails from "./pages/user/BookDetails";
 import AuthenticatedRoute from "./components/basic components/AuthenticatedRoute";
+import MyOrders from "./pages/user/MyOrders";
 
 const App = () => {
   const isAdminRoute = useMatch("/admin/*");
@@ -42,10 +43,11 @@ const App = () => {
       {!isAdminRoute && !isStaffRoute && <NavBar />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/books" element={<BookList />} />
+        <Route path="/myOrders" element={<MyOrders />} />
+        <Route path="/bookDetails/:bookId" element={<BookDetails />} />
         <Route element={<AuthenticatedRoute />}>
-          <Route path="/bookDetails/:bookId" element={<BookDetails />} />
+          <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/cart" element={<Cart />} />
         </Route>
         <Route path="/admin" element={<Admin />}>

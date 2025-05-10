@@ -1,55 +1,41 @@
 import React, { useEffect, useState } from "react";
 import apiClient from "../../api/axios";
+import { toast } from "react-toastify";
 
 const AdminOrder = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Commented out API call for now
-    // const fetchOrders = async () => {
-    //   setLoading(true);
-    //   try {
-    //     const token = localStorage.getItem("token");
-    //     const res = await apiClient.get("/order/getallorders", {
-    //       headers: {
-    //         Authorization: `Bearer ${token}`,
-    //       },
-    //     });
-    //     setOrders(res.data.data || []);
-    //   } catch (err) {
-    //     setOrders([]);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    // fetchOrders();
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const { data } = await apiClient.get("/order/all", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(data);
+        if (data.status === "success") {
+          setOrders(data.data);
+        }
+      } catch (error) {
+        toast.error("Failed to fetch orders");
+      }
+    };
+    fetchOrders();
 
-    // Static data for now
-    setOrders([
-      {
-        orderid: "ORD001",
-        userid: "USR123",
-        orderdate: "2024-06-10 14:23",
-        totalamount: 1200,
-        discountrate: "10%",
-        finaltotalamount: 1080,
-        status: "Delivered",
-        claimcode: "CLM12345",
-      },
-      {
-        orderid: "ORD002",
-        userid: "USR456",
-        orderdate: "2024-06-11 09:15",
-        totalamount: 800,
-        discountrate: "0%",
-        finaltotalamount: 800,
-        status: "Pending",
-        claimcode: "CLM67890",
-      },
-    ]);
     setLoading(false);
   }, []);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const handleStatusChange = (idx, newStatus) => {
     const newOrders = [...orders];
@@ -70,14 +56,27 @@ const AdminOrder = () => {
             <table className="min-w-full text-sm text-center">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-3 py-2 font-semibold text-center">Order ID</th>
-                  <th className="px-3 py-2 font-semibold text-center">User ID</th>
-                  <th className="px-3 py-2 font-semibold text-center">Order Date</th>
-                  <th className="px-3 py-2 font-semibold text-center">Total Amount</th>
-                  <th className="px-3 py-2 font-semibold text-center">Discount Rate</th>
-                  <th className="px-3 py-2 font-semibold text-center">Final Total Amount</th>
-                  <th className="px-3 py-2 font-semibold text-center">Status</th>
-                  <th className="px-3 py-2 font-semibold text-center">Claim Code</th>
+                  <th className="px-3 py-2 font-semibold text-center">
+                    Order ID
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-center">
+                    User ID
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-center">
+                    Order Date
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-center">
+                    Total Amount
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-center">
+                    Discount Rate
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-center">
+                    Final Total Amount
+                  </th>
+                  <th className="px-3 py-2 font-semibold text-center">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -89,20 +88,33 @@ const AdminOrder = () => {
                   </tr>
                 ) : (
                   orders.map((order, idx) => (
-                    <tr key={order.orderid} className="border-b last:border-b-0">
+                    <tr
+                      key={order.orderid}
+                      className="border-b last:border-b-0"
+                    >
                       <td className="px-3 py-2 text-center">{order.orderid}</td>
-                      <td className="px-3 py-2 text-center">{order.userid}</td>
-                      <td className="px-3 py-2 text-center">{order.orderdate}</td>
-                      <td className="px-3 py-2 text-center">{order.totalamount}</td>
-                      <td className="px-3 py-2 text-center">{order.discountrate}</td>
-                      <td className="px-3 py-2 text-center">{order.finaltotalamount}</td>
+                      <td className="px-3 py-2 text-center">{order.userId}</td>
+                      <td className="px-3 py-2 text-center">
+                        {formatDate(order.orderDate)}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        Rs.{order.originalTotal}
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        {order.discountRate}%
+                      </td>
+                      <td className="px-3 py-2 text-center">
+                        Rs.{order.finalTotal}
+                      </td>
                       <td className="px-3 py-2 text-center">
                         <select
                           value={order.status}
-                          onChange={e => handleStatusChange(idx, e.target.value)}
+                          onChange={(e) =>
+                            handleStatusChange(idx, e.target.value)
+                          }
                           className={`border rounded px-2 py-1 text-xs font-semibold
                             ${
-                              order.status === "Delivered"
+                              order.status === "Completed"
                                 ? "bg-green-100 text-green-700"
                                 : order.status === "Pending"
                                 ? "bg-yellow-100 text-yellow-700"
@@ -115,25 +127,33 @@ const AdminOrder = () => {
                             fontWeight: 600,
                             borderWidth: 2,
                             borderColor:
-                              order.status === "Delivered"
+                              order.status === "Completed"
                                 ? "#22c55e"
                                 : order.status === "Pending"
                                 ? "#eab308"
                                 : "#ef4444",
                           }}
                         >
-                          <option value="Pending" className="text-yellow-700 bg-yellow-100">
+                          <option
+                            value="Pending"
+                            className="text-yellow-700 bg-yellow-100"
+                          >
                             Pending
                           </option>
-                          <option value="Delivered" className="text-green-700 bg-green-100">
-                            Delivered
+                          <option
+                            value="Completed"
+                            className="text-green-700 bg-green-100"
+                          >
+                            Completed
                           </option>
-                          <option value="Cancelled" className="text-red-700 bg-red-100">
+                          <option
+                            value="Cancelled"
+                            className="text-red-700 bg-red-100"
+                          >
                             Cancelled
                           </option>
                         </select>
                       </td>
-                      <td className="px-3 py-2 text-center">{order.claimcode}</td>
                     </tr>
                   ))
                 )}

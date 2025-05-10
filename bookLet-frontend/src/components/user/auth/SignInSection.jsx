@@ -31,7 +31,7 @@ const SignInSection = ({ onClose, setShowSignUp }) => {
         toast.success(data.message || "Login successful !!!!!");
         onClose();
         await checkLogged();
-        getCart();
+        console.log(data.user.role)
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.user.role);
         window.dispatchEvent(new Event("storage"));
