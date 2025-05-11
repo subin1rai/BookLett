@@ -70,7 +70,7 @@ const CartCard = ({ carts }) => {
         <div className="flex items-center gap-6">
           <img
             className="w-32 h-24 object-cover rounded"
-            src={images.book2}
+            src={carts.book.imageUrl}
             alt={carts.book.title}
           />
           <div>

@@ -10,21 +10,20 @@ import NotificationComponent from "../../components/user/home/NotificationCompon
 
 const Home = () => {
   return (
-      <>
-    <div className="bg-web-background">
-    
-    <div className="px-24">
-    <HeroSection/>
-      <GenreSection/>
-      <BookSection/>
-    <BestSelling/>
-      <DealSection/>
-    </div>
-      <BannerSection/>
-      <NotificationComponent/>
-      <ContactSection/>
-    </div>
-      </>
+    <>
+      <div className="bg-web-background">
+        <div className="px-24">
+          <HeroSection />
+          <GenreSection />
+          <BookSection />
+          <BestSelling />
+          <DealSection />
+        </div>
+        <BannerSection />
+        <NotificationComponent />
+        <ContactSection />
+      </div>
+    </>
   );
 };
 

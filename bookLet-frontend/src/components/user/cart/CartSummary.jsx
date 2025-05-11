@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { BadgePercent, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom"; // ← import navigate hook
 import apiClient from "../../../api/axios";
 
 const CartSummary = ({ mergedCart }) => {
   const [showAllDiscounts, setShowAllDiscounts] = useState(false);
+  const [loading, setLoading] = useState(false); // ← loading state
+  const navigate = useNavigate(); // ← for navigation
 
   const discounts = [
     { name: "+5 Books Member Discount", value: "5%" },
@@ -25,6 +28,7 @@ const CartSummary = ({ mergedCart }) => {
   const total = subtotal;
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const { data } = await apiClient.post(
@@ -39,29 +43,28 @@ const CartSummary = ({ mergedCart }) => {
       );
       if (data.statusCode == 200) {
         toast.success(data.message);
+        setTimeout(() => {
+          navigate(-1); // go back
+        }, 1000); // delay to show toast
       }
     } catch (error) {
-      console.log(error.message);
+      toast.error("Order failed. Please try again.");
+      console.error(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="w-full max-w-sm">
-      {/* Summary Card - More compact */}
       <div className="w-full bg-gray-100 rounded-lg p-4 mb-4">
         <h1 className="text-lg font-semibold mb-2">Selected Offer Summary</h1>
-
-        {/* Summary items - Tighter spacing */}
         <div className="flex flex-col gap-3">
           <div className="flex justify-between items-center text-sm">
             <p className="text-gray-400">Proposed total</p>
             <p className="font-bold">Rs.{subtotal}</p>
           </div>
-
-          {/* Divider */}
           <hr className="border-gray-300 my-1" />
-
-          {/* Total - Compact but still prominent */}
           <div className="flex justify-between items-center">
             <p className="text-gray-400 font-semibold">TOTAL</p>
             <p className="font-bold text-2xl">Rs.{total}</p>
@@ -69,9 +72,7 @@ const CartSummary = ({ mergedCart }) => {
         </div>
       </div>
 
-      {/* Discounts Section - More compact design */}
       <div className="w-full bg-gray-50 rounded-lg p-4">
-        {/* Discounts Header - Smaller with better alignment */}
         <div className="flex justify-between items-center mb-3">
           <div className="flex items-center gap-1">
             <BadgePercent size={16} />
@@ -82,7 +83,6 @@ const CartSummary = ({ mergedCart }) => {
           </div>
         </div>
 
-        {/* Discounts List - Tighter spacing */}
         <div className="mb-4">
           <div className="space-y-2">
             {visibleDiscounts.map((discount, index) => (
@@ -100,7 +100,6 @@ const CartSummary = ({ mergedCart }) => {
               </div>
             ))}
 
-            {/* Show More/Less Button - Smaller and tighter */}
             {discounts.length > 2 && (
               <button
                 onClick={() => setShowAllDiscounts(!showAllDiscounts)}
@@ -123,12 +122,14 @@ const CartSummary = ({ mergedCart }) => {
               </button>
             )}
 
-            {/* Order Button - Slightly smaller but still prominent */}
             <button
               onClick={handleSubmit}
-              className="w-full bg-web-primary py-3 font-bold text-lg rounded-lg mt-4"
+              disabled={loading}
+              className={`w-full py-3 font-bold text-lg rounded-lg mt-4 ${
+                loading ? "bg-gray-400 cursor-not-allowed" : "bg-web-primary"
+              }`}
             >
-              Order
+              {loading ? "Processing..." : "Order"}
             </button>
           </div>
         </div>
