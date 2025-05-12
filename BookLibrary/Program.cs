@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173") // 🔁 Replace with your frontend origin
+            .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials(); // Required for SignalR
@@ -88,13 +88,14 @@ builder.Services.AddAuthorization(options =>
     // Policy for Admin role
     options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
     options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Staff"));
-
+    options.AddPolicy("RequireAdminOrStaff", policy =>
+        policy.RequireRole("Admin", "Staff"));
     // Policy for User role
     options.AddPolicy("RequireUserRole", policy => policy.RequireRole("User"));
 });
 
 builder.Services.AddScoped<TokenServices>();
-builder.Services.AddTransient<IEmailService,EmailServices>();
+builder.Services.AddTransient<IEmailService, EmailServices>();
 builder.Services.AddSingleton<CloudinaryService>();
 
 
@@ -110,7 +111,7 @@ app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthorization();
-app.MapHub<NotificationHub>("/hubs/notification"); 
+app.MapHub<NotificationHub>("/hubs/notification");
 app.MapControllers();
 
 app.Run();

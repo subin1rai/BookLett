@@ -1,4 +1,5 @@
 using BookLibrary.Data;
+using BookLibrary.DTOs.Request;
 using BookLibrary.Model;
 using BookLibrary.Service;
 using Microsoft.AspNetCore.Authorization;
@@ -36,7 +37,7 @@ namespace BookLibrary.Controllers
 
             var userId = Guid.Parse(userClaim.Value);
             var user = await _context.Users.FindAsync(userId);
-            
+
             if (user == null) return NotFound("User not found");
 
             var cartItems = await _context.CartItems
@@ -129,7 +130,7 @@ namespace BookLibrary.Controllers
 
             var userId = Guid.Parse(userClaim.Value);
             var user = await _context.Users.FindAsync(userId);
-            
+
             if (user == null) return NotFound("User not found");
 
             var order = await _context.Orders
@@ -160,15 +161,15 @@ namespace BookLibrary.Controllers
             });
         }
 
+
         [HttpGet("all")]
-        [Authorize(Policy = "requireAdminRole")]
-        [Authorize(Policy = "requireStaffRole")]
+        [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> GetAllOrders()
         {
             var orders = await _context.Orders
                 .Include(o => o.User)
                 .Include(o => o.OrderItems)
-                .ThenInclude(oi => oi.Book)
+                    .ThenInclude(oi => oi.Book)
                 .ToListAsync();
 
             if (orders == null || !orders.Any())
@@ -180,13 +181,90 @@ namespace BookLibrary.Controllers
                 });
             }
 
+            var dtoList = orders.Select(o => new OrderDTO
+            {
+                OrderId = o.OrderId,
+                Username = o.User.Username,
+                OrderDate = o.OrderDate,
+                FinalTotal = o.FinalTotal,
+                DiscountRate = o.DiscountRate,
+                Status = o.Status,
+                BookTitles = o.OrderItems.Select(i => i.Book.Title).ToList(),
+                OrderItems = o.OrderItems.Select(oi => new OrderItemDTO
+                {
+                    BookId = oi.BookId,
+                    Title = oi.Book.Title,
+                    Quantity = oi.Quantity,
+                    PricePerUnit = oi.PricePerUnit,
+                }).ToList()
+            }).ToList();
+
+
             return Ok(new
             {
                 status = "success",
                 message = "Orders retrieved successfully",
-                data = orders
+                data = dtoList
             });
         }
+
+
+        //order By User
+        [HttpGet("userOrder")]
+        [Authorize(Policy = "RequireUserRole")]
+
+        public async Task<IActionResult> GetUserOrders()
+        {
+            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userClaim == null)
+                return Unauthorized("Token is missing or invalid");
+
+            var userId = Guid.Parse(userClaim.Value);
+            var user = await _context.Users.FindAsync(userId);
+
+            var orders = await _context.Orders
+            .Where(o => o.UserId == userId)
+                .Include(o => o.User)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Book)
+                .ToListAsync();
+
+            if (orders == null || !orders.Any())
+            {
+                return NotFound(new
+                {
+                    status = "error",
+                    message = "No orders found"
+                });
+            }
+
+            var dtoList = orders.Select(o => new OrderDTO
+            {
+                OrderId = o.OrderId,
+                Username = o.User.Username,
+                OrderDate = o.OrderDate,
+                FinalTotal = o.FinalTotal,
+                DiscountRate = o.DiscountRate,
+                Status = o.Status,
+                BookTitles = o.OrderItems.Select(i => i.Book.Title).ToList(),
+                OrderItems = o.OrderItems.Select(oi => new OrderItemDTO
+                {
+                    BookId = oi.BookId,
+                    Title = oi.Book.Title,
+                    Quantity = oi.Quantity,
+                    PricePerUnit = oi.PricePerUnit,
+                }).ToList()
+            }).ToList();
+
+
+            return Ok(new
+            {
+                status = "success",
+                message = "Orders retrieved successfully",
+                data = dtoList
+            });
+        }
+
 
         [HttpPost("sendEmail")]
         public async Task<IActionResult> SendEmail([FromBody] EmailRequest request)

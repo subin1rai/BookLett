@@ -45,6 +45,7 @@ const SignInSection = ({ onClose, setShowSignUp }) => {
     } catch (error) {
       const errorMessage =
         error.response?.data || "An unexpected error occurred during login.";
+        toast.warn(errorMessage);
       console.log(errorMessage);
       toast.error("Failed to Login");
     }

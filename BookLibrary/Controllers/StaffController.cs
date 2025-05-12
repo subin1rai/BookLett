@@ -81,7 +81,7 @@ namespace BookLibrary.Controllers
             {
                 message = $"{user.Username} has purchased the book!"
             };
-            _context.Orders.Update(order); 
+            _context.Orders.Update(order);
             _context.Notifications.Add(addNotification);
             await _context.SaveChangesAsync();
 
