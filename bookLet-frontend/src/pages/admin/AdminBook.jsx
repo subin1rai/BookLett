@@ -17,7 +17,6 @@ const AdminBook = () => {
         const res = await apiClient.get("/bookcrud/getallbooks", {
           headers: {
             "Content-Type": "application/json",
-            Accept: "application/json",
           },
         });
         

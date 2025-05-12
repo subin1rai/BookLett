@@ -5,7 +5,7 @@ import DealCard from './DealCard';
 import BookCard from './BookCard';
 
 const BestSelling = () => {
-      const { allBooks } = useContext(AppContext) || { allBooks: [] };
+      const { bestSeller } = useContext(AppContext) || { bestSeller: [] };
     
 
   // Categories
@@ -18,7 +18,7 @@ const BestSelling = () => {
     "Action & Adventure"
   ];
 
-  return allBooks? (
+  return bestSeller? (
     <div className="bg-gray-100 p-6 rounded-3xl max-w-6xl mx-auto my-20">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Best Selling Books</h1>
@@ -69,8 +69,8 @@ const BestSelling = () => {
 
         {/* Book cards */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {allBooks.slice(0, 3).map((book) => (
-          <BookCard key={book.bookId} book={book} />
+        {bestSeller.slice(0, 3).map((book) => (
+          <BookCard key={book.book.bookId} book={book.book} />
         ))}
         </div>
       </div>

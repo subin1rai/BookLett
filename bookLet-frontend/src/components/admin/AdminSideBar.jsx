@@ -18,7 +18,7 @@ const AdminSidebar = () => {
     { name: "Dashboard", path: "/admin", icons: List },
     { name: "Books", path: "/admin/books", icons: Book },
     { name: "Orders", path: "/admin/orders", icons: ShoppingBag },
-    { name: "Customers", path: "/admin/customers", icons: User },
+    { name: "Users", path: "/admin/users", icons: User },
     { name: "Staff", path: "/admin/staff", icons: Users },
     { name: "Banners", path: "/admin/banners", icons: ScrollText },
     { name: "Reports", path: "/admin/reports", icons: ListCheck },

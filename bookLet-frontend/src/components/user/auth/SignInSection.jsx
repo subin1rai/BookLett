@@ -31,8 +31,9 @@ const SignInSection = ({ onClose, setShowSignUp }) => {
         toast.success(data.message || "Login successful !!!!!");
         onClose();
         await checkLogged();
-        console.log(data.user.role)
+        getCart();
         localStorage.setItem("token", data.token);
+        localStorage.setItem("userId", data.user.id);
         localStorage.setItem("role", data.user.role);
         window.dispatchEvent(new Event("storage"));
         if (data.user.role === "Admin") {
@@ -45,6 +46,7 @@ const SignInSection = ({ onClose, setShowSignUp }) => {
       const errorMessage =
         error.response?.data || "An unexpected error occurred during login.";
       console.log(errorMessage);
+      toast.error("Failed to Login");
     }
   };
 

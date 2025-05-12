@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import apiClient from "../../../api/axios";
 import { toast } from "react-toastify";
 
-const SignUpSection = ({ onClose, setShowSignIn }) => {
+const SignUpSection = ({ onClose, setShowVerification }) => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -14,22 +14,34 @@ const SignUpSection = ({ onClose, setShowSignIn }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log({ email, username, password, confirmPassword });
-    const payload = {
-      email,
-      username,
-      password,
-      confirmPassword,
-    };
-    const { data } = await apiClient.post("/Auth/register", payload, {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    if (data.statusCode == 200) {
-      toast.success(data.message);
-      setShowSignIn(true);
-      onClose();
+    try {
+      console.log({ email, username, password, confirmPassword });
+
+      const payload = {
+        email,
+        username,
+        password,
+        confirmPassword,
+      };
+
+      const { data } = await apiClient.post("/Auth/register", payload, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(data)
+
+      if (data.statusCode === 200) {
+        toast.success(data.message);
+        setShowVerification({ show: true, userId: data.user.id }); // Pass userId here
+        onClose();
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      toast.error(
+        error.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
     }
   };
 
