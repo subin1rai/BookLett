@@ -14,6 +14,7 @@ public class BookDTO
     public string Publisher { get; set; } = string.Empty;
 
     public DateTime PublicationDate { get; set; }
+    public bool  AwardWinners {get; set;} 
 
     public int Price { get; set; }
 

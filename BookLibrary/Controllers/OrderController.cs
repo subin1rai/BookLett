@@ -95,7 +95,19 @@ namespace BookLibrary.Controllers
             }
             var receptor = user.Email;
             var subject = $"Order Confirmation Details - Order ID: {order.OrderId}";
-            var body = $"Your order has been placed successfully. Order ID: {order.OrderId}. Claim Code: {order.ClaimCode}. Total Amount: {finalTotal}. Discount Applied: {cartLevelDiscount * 100}%.";
+            var body = $@"
+    <div style='font-family: Arial, sans-serif; text-align: center; padding: 20px;'>
+        <h2 style='font-size: 28px; color: #2c3e50;'>🎉 Order Confirmation 🎉</h2>
+        <div style='margin-top: 20px; font-size: 36px; font-weight: bold; color: #27ae60;'>
+            {order.ClaimCode}
+        </div>
+        <p style='margin-top: 30px; font-size: 16px; color: #333;'>Your order has been placed successfully.</p>
+        <p><strong>Order ID:</strong> {order.OrderId}</p>
+        <p><strong>Total Amount:</strong> Rs. {finalTotal:F2}</p>
+        <p><strong>Discount Applied:</strong> {cartLevelDiscount * 100}%</p>
+        <p style='margin-top: 20px;'>Thank you for shopping with us!</p>
+    </div>";
+
             await _emailService.SendEmail(receptor, subject, body);
             // await 
             _context.Orders.Add(order);

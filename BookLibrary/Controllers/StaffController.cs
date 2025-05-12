@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace BookLibrary.Controllers
 {
@@ -29,7 +30,6 @@ namespace BookLibrary.Controllers
         [Authorize(Roles = "Admin, Staff")]
         public async Task<IActionResult> VerifyOrder(Guid id, OrderDTO orders)
         {
-
             if (orders.ClaimCode == null)
             {
                 return BadRequest(new
@@ -39,8 +39,11 @@ namespace BookLibrary.Controllers
                 });
             }
 
-            var order = await _context.Orders.FindAsync(id);
-            var user = await _context.Users.FindAsync(order.UserId);
+            var order = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Book)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
             if (order == null)
             {
                 return NotFound(new
@@ -49,6 +52,8 @@ namespace BookLibrary.Controllers
                     message = "Order not found"
                 });
             }
+
+            var user = await _context.Users.FindAsync(order.UserId);
 
             if (order.ClaimCode != orders.ClaimCode)
             {
@@ -68,19 +73,34 @@ namespace BookLibrary.Controllers
                 });
             }
 
-            if (order.ClaimCode == orders.ClaimCode)
+            // Deduct stock quantities
+            foreach (var item in order.OrderItems)
             {
-                // Update order status to "Completed"
-                order.Status = "Completed";
-                order.ClaimCode = null; // Clear the claim code after verification
+            var books = item.Book.Title; 
+                if (item.Book.Quantity < item.Quantity)
+                {
+                    return BadRequest(new
+                    {
+                        status = "error",
+                        message = $"Not enough stock for book: {item.Book.Title}"
+                    });
+                }
 
+                item.Book.Quantity -= item.Quantity;
+                _context.Books.Update(item.Book);
             }
 
-            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Purchased Book", $"{user.Username} has purchased the book!");
+            // Update order status
+            order.Status = "Completed";
+            order.ClaimCode = null;
+
+            await _hubContext.Clients.All.SendAsync("ReceiveMessage", "Purchased Book", $"{user.Username} has purchased the book ");
+
             var addNotification = new Notification
             {
                 message = $"{user.Username} has purchased the book!"
             };
+
             _context.Orders.Update(order);
             _context.Notifications.Add(addNotification);
             await _context.SaveChangesAsync();
@@ -88,10 +108,9 @@ namespace BookLibrary.Controllers
             return Ok(new
             {
                 status = "success",
-                message = "Order verified successfully"
+                message = "Order verified and stock updated successfully"
             });
-        }
-
+        } 
 
     }
 }
