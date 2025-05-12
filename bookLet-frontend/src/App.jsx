@@ -21,6 +21,9 @@ import StaffOrder from "./pages/staff/StaffOrder";
 import BookDetails from "./pages/user/BookDetails";
 import AuthenticatedRoute from "./components/basic components/AuthenticatedRoute";
 import MyOrders from "./pages/user/MyOrders";
+import Member from "./pages/admin/UserList";
+import StaffList from "./pages/admin/StaffList";
+import NotificationComponent from "./components/user/NotificationComponent";
 
 const App = () => {
   const isAdminRoute = useMatch("/admin/*");
@@ -40,6 +43,7 @@ const App = () => {
     <div className="text-default min-h-screen bg-white">
       <ToastContainer />
       {!isAdminRoute && !isStaffRoute && <NavBar />}
+      {!isAdminRoute && !isStaffRoute && <NotificationComponent />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/books" element={<BookList />} />
@@ -53,8 +57,8 @@ const App = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/books" element={<AdminBook />} />
           <Route path="/admin/orders" element={<AdminOrder />} />
-          <Route path="/admin/customers" element={<AdminDashboard />} />
-          <Route path="/admin/staff" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<Member />} />
+          <Route path="/admin/staff" element={<StaffList />} />
           <Route path="/admin/banners" element={<Banner />} />
           <Route path="/admin/reports" element={<AdminDashboard />} />
           <Route path="/admin/settings" element={<AdminDashboard />} />

@@ -293,10 +293,10 @@ const EditBooks = () => {
             Book Cover Image
           </label>
           <div className="flex items-center space-x-4">
-            {imagePreview && (
+            {(imagePreview || book.imageUrl) && (
               <div className="relative w-32 h-44 border rounded-md overflow-hidden">
                 <img
-                  src={imagePreview}
+                  src={imagePreview || book.imageUrl}
                   alt="Book cover"
                   className="w-full h-full object-cover"
                 />

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
+  Bell,
   ChevronDown,
   CircleUserRound,
   Heart,
@@ -15,18 +16,97 @@ import images from "../../assets/assets";
 import SignUp from "../user/auth/SignUpSection";
 import SignIn from "../user/auth/SignInSection";
 import { AppContext } from "../../context/AppContext";
-import { toast } from "react-toastify";
 import apiClient from "../../api/axios";
+import UserVerification from "./auth/UserVerification";
+import AllNotifications from "./notification/AllNotifications";
 
 const NavBar = () => {
-  const navgate = useNavigate();
+  const navigate = useNavigate();
   const [categoryDropdownOpen, setCategoryDropdownOpen] = useState(false);
-  const { showSignUp, setShowSignUp, showSignIn, setShowSignIn } =
-    useContext(AppContext);
+  const {
+    showSignUp,
+    setShowSignUp,
+    showSignIn,
+    setShowSignIn,
+    setShowVerification,
+    showVerification,
+  } = useContext(AppContext);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [announcement, setAnnouncement] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userData, setUserData] = useState({});
+  const [notifications, setNotifications] = useState([]);
+  const [notificationsCount, setNotificationsCount] = useState(0);
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [elapsedTime, setElapsedTime] = useState("");
+
+  const fetchNotification = async () => {
+    try {
+      const { data } = await apiClient.get("/notification/all", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(data);
+
+      if (data.statusCode == 200) {
+        setNotifications(data.data);
+        setNotificationsCount(data.data.length);
+      }
+    } catch (error) {
+      console.log("Failed to fetch notification");
+    }
+  };
+
+  const fetchUser = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const id = localStorage.getItem("userId");
+      const { data } = await apiClient.get(`/user/getuserbyid/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(data);
+      setUserData(data);
+    } catch (error) {
+      console.log("Failed to fetch user");
+    }
+  };
+
+  const calculateElapsedTime = (endDate) => {
+    const start = new Date();
+    const now = new Date(endDate);
+
+    if (isNaN(start)) return "Invalid start date";
+
+    let diffMs = now - start;
+    if (diffMs < 0) return "Starts in future";
+
+    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    diffMs %= 1000 * 60 * 60 * 24;
+
+    const hours = Math.floor(diffMs / (1000 * 60 * 60));
+    diffMs %= 1000 * 60 * 60;
+
+    const minutes = Math.floor(diffMs / (1000 * 60));
+    diffMs %= 1000 * 60;
+
+    const seconds = Math.floor(diffMs / 1000);
+
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+  };
+
+  useEffect(() => {
+    if (announcement?.start) {
+      const intervalId = setInterval(() => {
+        setElapsedTime(calculateElapsedTime(announcement.end));
+      }, 1000);
+
+      return () => clearInterval(intervalId);
+    }
+  }, [announcement]);
 
   const getBanner = async () => {
     try {
@@ -34,6 +114,7 @@ const NavBar = () => {
       if (!data.active) {
         setAnnouncement("");
       }
+      console.log(data);
       setAnnouncement(data);
     } catch (error) {
       console.log(error.message);
@@ -42,7 +123,14 @@ const NavBar = () => {
 
   useEffect(() => {
     getBanner();
+    fetchNotification();
   }, []);
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchUser();
+    }
+  }, [isLoggedIn]);
 
   useEffect(() => {
     const checkLogin = () => {
@@ -56,7 +144,6 @@ const NavBar = () => {
     return () => window.removeEventListener("storage", checkLogin);
   }, []);
 
-  // Add this useEffect to your NavBar component to disable body scrolling when menu is open
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = "hidden";
@@ -69,9 +156,30 @@ const NavBar = () => {
     };
   }, [menuOpen]);
 
-  // Also add a ref to close the menu when clicking outside
-  const menuRef = useRef(null);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        notificationRef.current &&
+        !notificationRef.current.contains(event.target)
+      ) {
+        setShowNotifications(false);
+      }
+    };
 
+    if (showNotifications) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showNotifications]);
+
+  const menuRef = useRef(null);
+  const notificationRef = useRef(null);
+  const toggleNotifications = () => {
+    setShowNotifications((prev) => !prev);
+  };
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -93,6 +201,9 @@ const NavBar = () => {
           <div
             className={`container ${announcement.color} mx-auto flex items-center justify-center`}
           >
+            <span className={`${announcement.textColor} pr-2 font-semibold`}>
+              {elapsedTime}
+            </span>
             <span className={`text-md text-white ${announcement.color}`}>
               {announcement.message}
             </span>
@@ -308,7 +419,40 @@ const NavBar = () => {
           </div>
 
           {/* Right side icons - GitHub style menu */}
-          <div className="relative" ref={menuRef}>
+          <div
+            className="relative flex flex-row items-center gap-4"
+            ref={menuRef}
+          >
+            {/* Notification Bell with Popup */}
+            <div className="relative" ref={notificationRef}>
+              <button
+                onClick={toggleNotifications}
+                className="relative p-1 rounded-full hover:bg-gray-100"
+                aria-label="Notifications"
+              >
+                <Bell className="h-6 w-6" />
+              </button>
+
+              {/* Notification Popup */}
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-web-background rounded-md shadow-lg z-50">
+                  <div className="p-4">
+                    <h3 className="text-lg font-medium">Notifications</h3>
+
+                    <div className="mt-2 max-h-60 overflow-y-auto space-y-2">
+                      {/* Display notifications (scrollable if more than ~4) */}
+                      {notifications.map((notification, index) => (
+                        <AllNotifications
+                          key={index}
+                          notification={notification}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="p-1 rounded-full flex items-center justify-center"
@@ -323,18 +467,16 @@ const NavBar = () => {
                 {/* Full-screen overlay to darken background */}
                 <div className="fixed h-[100vh]  inset-0 bg-black bg-opacity-20 z-40" />
 
-                {/* GitHub-style dropdown menu */}
                 <div className="fixed right-0 top-0 h-screen w-80 bg-web-secondary shadow-lg z-50 overflow-auto">
-                  {/* User info header */}
                   <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                     <div>
                       <div className="text-lg items-center font-semibold text-gray-200 flex flex-row gap-2">
                         <CircleUserRound className="text-web-primary h-8 w-8" />{" "}
-                        {isLoggedIn ? "John Doe" : "Guest User"}
+                        {isLoggedIn ? `${userData.username}` : "Guest User"}
                       </div>
                       <div className="text-sm text-gray-100 mt-1">
                         {isLoggedIn
-                          ? "john.doe@example.com"
+                          ? `${userData.email}`
                           : "Sign in to your account"}
                       </div>
                     </div>
@@ -373,7 +515,7 @@ const NavBar = () => {
                         Your Profile
                       </NavLink>
                       <NavLink
-                        to="/myOrders"
+                        to="/orders"
                         className="flex flex-row gap-2  px-4 py-2 text-sm text-gray-300 hover:bg-gray-100"
                         onClick={() => setMenuOpen(false)}
                       >
@@ -406,7 +548,7 @@ const NavBar = () => {
                         onClick={() => {
                           localStorage.removeItem("token");
                           localStorage.removeItem("role");
-                          navgate("/");
+                          navigate("/");
                           setIsLoggedIn(false);
                           setMenuOpen(false);
                         }}
@@ -434,16 +576,24 @@ const NavBar = () => {
           </div>
         </div>
       </div>
+
       {showSignIn && (
         <SignIn
           onClose={() => setShowSignIn(false)}
           setShowSignUp={setShowSignUp}
         />
       )}
+      {showVerification.show && (
+        <UserVerification
+          onClose={() => setShowVerification({ show: false, userId: null })}
+          setShowSignIn={setShowSignIn}
+          userId={showVerification.userId}
+        />
+      )}
       {showSignUp && (
         <SignUp
           onClose={() => setShowSignUp(false)}
-          setShowSignIn={setShowSignIn}
+          setShowVerification={setShowVerification}
         />
       )}
     </div>
