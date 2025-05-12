@@ -44,6 +44,7 @@ const StaffOrder = () => {
             <OrderVerify
               order={selectedOrder}
               onClose={() => setIsVerify(false)}
+              onVerified={fetchOrders}
             />
           </div>
         </div>

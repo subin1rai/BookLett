@@ -6,12 +6,11 @@ import DealSection from "../../components/user/home/DealSection";
 import BannerSection from "../../components/user/home/BannerSection";
 import ContactSection from "../../components/user/home/ContactSection";
 import BestSelling from "../../components/user/home/BestSelling";
-import NotificationComponent from "../../components/user/home/NotificationComponent";
 
 const Home = () => {
   return (
-    <>
-      <div className="bg-web-background">
+    <div className="bg-web-background pb-24">
+      <div >
         <div className="px-24">
           <HeroSection />
           <GenreSection />
@@ -20,10 +19,9 @@ const Home = () => {
           <DealSection />
         </div>
         <BannerSection />
-        <NotificationComponent />
         <ContactSection />
       </div>
-    </>
+    </div>
   );
 };
 

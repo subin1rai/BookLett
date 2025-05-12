@@ -1,3 +1,7 @@
+import React, { useState } from "react";
+import apiClient from "../../api/axios";
+import { toast } from "react-toastify";
+
 const genreOptions = [
   "Fiction",
   "Non-Fiction",
@@ -9,9 +13,6 @@ const genreOptions = [
   "Romance",
   "Horror",
 ];
-import React, { useState } from "react";
-import apiClient from "../../api/axios";
-import { toast } from "react-toastify";
 
 const AddBooks = () => {
   const [formData, setFormData] = useState({
@@ -27,6 +28,9 @@ const AddBooks = () => {
     language: "",
     discount: "",
     format: "",
+    isOnSale: false,
+    availableInLibrary: false,
+    awardWinners: false,
   });
 
   const [image, setImage] = useState(null);
@@ -39,6 +43,14 @@ const AddBooks = () => {
     setFormData((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  // New method to handle toggle buttons
+  const handleToggle = (fieldName) => {
+    setFormData((prev) => ({
+      ...prev,
+      [fieldName]: !prev[fieldName],
     }));
   };
 
@@ -126,6 +138,25 @@ const AddBooks = () => {
     [{ label: "Quantity", name: "quantity", type: "number" }],
   ];
 
+  // Toggle buttons configuration
+  const toggleButtons = [
+    {
+      name: "isOnSale",
+      label: "On Sale",
+      description: "Mark if the book is currently on sale",
+    },
+    {
+      name: "availableInLibrary",
+      label: "Library Available",
+      description: "Mark if the book is available in library",
+    },
+    {
+      name: "awardWinners",
+      label: "Award Winner",
+      description: "Mark if the book has won awards",
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F1F2EE] p-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
@@ -175,10 +206,10 @@ const AddBooks = () => {
                     <option value="Signed Edition">Signed Edition</option>
                     <option value="Limited Edition">Limited Edition</option>
                     <option value="First Edition">First Edition</option>
-                    <option value="Collector’s Edition">
-                      Collector’s Edition
+                    <option value="Collector's Edition">
+                      Collector's Edition
                     </option>
-                    <option value="Author’s Edition">Author’s Edition</option>
+                    <option value="Author's Edition">Author's Edition</option>
                     <option value="Deluxe Edition">Deluxe Edition</option>
                   </select>
                 ) : (
@@ -191,6 +222,34 @@ const AddBooks = () => {
                     required
                   />
                 )}
+              </div>
+            ))}
+          </div>
+
+          {/* Toggle Buttons Section */}
+          <div className="mb-6 grid md:grid-cols-3 gap-9">
+            {toggleButtons.map(({ name, label, description }) => (
+              <div key={name} className="flex flex-col items-start">
+                <label className="block text-[#435058] font-medium mb-2">
+                  {label}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => handleToggle(name)}
+                  className={`
+                    w-full p-3 rounded-md transition-colors duration-300 
+                    ${
+                      formData[name]
+                        ? "bg-web-primary"
+                        : "bg-gray-200 text-gray-700"
+                    }
+                  `}
+                >
+                  {formData[name] ? "True" : "False"}
+                </button>
+                <p className="text-xs font-semibold text-gray-500 mt-1">
+                  {description}
+                </p>
               </div>
             ))}
           </div>
@@ -231,7 +290,7 @@ const AddBooks = () => {
               <div className="w-32 h-48 bg-gray-100 rounded-md overflow-hidden border border-gray-300 flex items-center justify-center">
                 {previewUrl ? (
                   <img
-                    src="/api/placeholder/200/300"
+                    src={previewUrl}
                     alt="Book cover preview"
                     className="w-full h-full object-cover"
                   />

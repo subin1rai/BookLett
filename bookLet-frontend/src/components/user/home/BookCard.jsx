@@ -10,7 +10,7 @@ const BookCard = ({ book }) => {
   const [wish, setWish] = useState(false);
   const { addToCart, fetchWishlist, setWishlist, checkLogged } =
     useContext(AppContext);
-console.log(book)
+console.log("books", book)
   const token = localStorage.getItem("token");
   const bookId = book.bookId;
   const checkWish = async () => {
@@ -103,7 +103,7 @@ console.log(book)
       <div className="relative mb-2">
         <Link to={`/bookDetails/${book.bookId}`} state={{ book }}>
           <img
-            src={book.imageUrl? book.imageUrl : images.book1}
+            src={book.imageUrl? book.imageUrl : images.book2}
             alt={book.title}
             className="w-full h-[386px] object-cover rounded-[20px]"
           />
