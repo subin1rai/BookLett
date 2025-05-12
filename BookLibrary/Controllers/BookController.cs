@@ -54,13 +54,14 @@ namespace BookLibrary.Controllers
                 Publisher = createBook.Publisher,
                 PublicationDate = createBook.PublicationDate,
                 Price = createBook.Price,
+                AwardWinners = createBook.AwardWinners,
                 Quantity = createBook.Quantity,
                 ImageUrl = imageUrl,
                 Language = createBook.Language,
                 Discount = createBook.Discount,
                 Format = createBook.Format,
-                AvailableInLibrary = true,
-                IsOnSale = false
+                AvailableInLibrary = createBook.AvailableInLibrary,
+                IsOnSale = createBook.IsOnSale
             };
 
             _context.Books.Add(book);
@@ -96,6 +97,7 @@ namespace BookLibrary.Controllers
                 Format = b.Format,
                 ImageUrl = b.ImageUrl,
                 AvailableInLibrary = b.AvailableInLibrary,
+                AwardWinners = b.AwardWinners,
                 IsOnSale = b.IsOnSale
             }).ToList();
             return Ok(bookDtos);
@@ -130,6 +132,7 @@ namespace BookLibrary.Controllers
                 Format = book.Format,
                 Quantity = book.Quantity,
                 ImageUrl = book.ImageUrl,
+                AwardWinners = book.AwardWinners,
                 AvailableInLibrary = book.AvailableInLibrary,
                 IsOnSale = book.IsOnSale
             };
@@ -143,7 +146,8 @@ namespace BookLibrary.Controllers
 
         [HttpPut("updatebook/{id}")]
         [Authorize(Policy = "RequireAdminRole")]
-        public async Task<IActionResult> UpdateBook(Guid id, [FromForm] CreateBookDTO updateBook, IFormFile image)
+        public async Task<IActionResult> UpdateBook(Guid id, [FromForm] CreateBookDTO updateBook,   IFormFile image,
+            [FromServices] CloudinaryService cloudinaryService)
         {
             var book = await _context.Books.FindAsync(id);
             if (book == null)
@@ -153,21 +157,9 @@ namespace BookLibrary.Controllers
 
             // Upload the image
             string imageUrl = null;
-            if (image != null && image.Length > 0)
+            if (image != null)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid() + Path.GetExtension(image.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await image.CopyToAsync(stream);
-                }
-
-                imageUrl = $"{Request.Scheme}://{Request.Host}/uploads/{fileName}";
+                imageUrl = await cloudinaryService.UploadImageAsync(image);
             }
 
             book.Title = updateBook.Title ?? book.Title;
@@ -178,11 +170,14 @@ namespace BookLibrary.Controllers
             book.Language = updateBook.Language;
             book.Discount = updateBook.Discount;
             book.Format = updateBook.Format;
+            book.AwardWinners = updateBook.AwardWinners;
             book.Publisher = updateBook.Publisher;
             book.PublicationDate = updateBook.PublicationDate;
             book.Price = updateBook.Price;
+            book.IsOnSale = updateBook.IsOnSale;
+            book.AvailableInLibrary = updateBook.AvailableInLibrary;
             book.Quantity = updateBook.Quantity;
-            book.ImageUrl = imageUrl ?? book.ImageUrl; // Keep the old image URL if no new image is provided
+            book.ImageUrl = imageUrl ?? book.ImageUrl;
 
             _context.Books.Update(book);
             await _context.SaveChangesAsync();

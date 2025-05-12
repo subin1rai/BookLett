@@ -14,11 +14,14 @@ namespace BookLibrary.Controllers
     {
         private readonly AuthDbContext _context;
         private readonly TokenServices _token;
+        private readonly IEmailService _emailService;
 
-        public AuthController(AuthDbContext context, TokenServices token)
+
+        public AuthController(AuthDbContext context, TokenServices token, IEmailService emailService)
         {
             _context = context;
             _token = token;
+            _emailService = emailService;
         }
     
 
@@ -56,6 +59,12 @@ namespace BookLibrary.Controllers
                 user.Role = "Admin";
             }
 
+             var receptor = user.Email;
+            var subject = $"Verfication code BOOKLETT";
+            var body = $"Your otp is {verifyCode}";
+           
+            await _emailService.SendEmail(receptor, subject, body);
+
             // Add user to database
             _context.Users.Add(user);
 
@@ -81,12 +90,17 @@ namespace BookLibrary.Controllers
         public async Task<ActionResult<object>> Login(LoginDTO loginDto)
         {
             // Find user by username
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == loginDto.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == loginDto.Username);
 
             // Check if user exists
             if (user == null)
             {
                 return Unauthorized("Invalid username or password");
+            }
+
+            if (user.IsVerified == false)
+            {
+                return Unauthorized("Please Verify user Account !");
             }
 
             // Verify password
@@ -97,6 +111,7 @@ namespace BookLibrary.Controllers
 
             // Generate JWT token
             var token = _token.GenerateToken(user);
+            
 
             // Return token and user information
             return Ok(new
@@ -118,10 +133,10 @@ namespace BookLibrary.Controllers
 
         //verify user
         [HttpPut("verify")]
-        public async Task<ActionResult<object>> VerifyUser(RegisterDTO registerDTO)
+        public async Task<ActionResult<object>> VerifyUser(verifyDTO verifyDTO)
         {
             // Find user by ID
-            var user = await _context.Users.FindAsync(registerDTO.Id);
+            var user = await _context.Users.FindAsync(verifyDTO.Id);
 
             // Check if user exists
             if (user == null)
@@ -130,7 +145,7 @@ namespace BookLibrary.Controllers
             }
 
             // Check if verification code matches
-            if (user.VerificationCode != registerDTO.VerificationCode)
+            if (user.VerificationCode != verifyDTO.VerificationCode)
             {
                 return BadRequest("Invalid verification code");
             }

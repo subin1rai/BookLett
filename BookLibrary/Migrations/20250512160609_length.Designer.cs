@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookLibrary.Migrations
 {
     [DbContext(typeof(AuthDbContext))]
-    [Migration("20250509101717_bookss")]
-    partial class bookss
+    [Migration("20250512160609_length")]
+    partial class length
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,13 +74,16 @@ namespace BookLibrary.Migrations
                     b.Property<bool>("AvailableInLibrary")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("AwardWinners")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<int>("Discount")
                         .HasColumnType("integer");

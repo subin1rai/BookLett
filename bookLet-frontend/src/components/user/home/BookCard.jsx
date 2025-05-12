@@ -13,10 +13,7 @@ const BookCard = ({ book }) => {
   const [showSale, setShowSale] = useState(false);
   const { addToCart, fetchWishlist, setWishlist, checkLogged } = useContext(AppContext);
 
-  const { addToCart, fetchWishlist, setWishlist, checkLogged } =
-    useContext(AppContext);
-console.log("books", book)
-
+>>>>>>>>> Temporary merge branch 2
   const token = localStorage.getItem("token");
   const bookId = book.bookId;
 

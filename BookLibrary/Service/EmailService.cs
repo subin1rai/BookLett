@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.Mail;
 namespace BookLibrary.Service;
 
-public class EmailServices: IEmailService
+public class EmailServices : IEmailService
 {
     public readonly IConfiguration _configuration;
 
@@ -12,11 +12,12 @@ public class EmailServices: IEmailService
         _configuration = configuration;
     }
 
-    public async Task SendEmail(string receptor, string subject, string body){
-        var email = _configuration.GetValue <string> ("EMAIL_CONFIGURATION:EMAIL");
-        var password = _configuration.GetValue <string> ("EMAIL_CONFIGURATION:PASSWORD");
-        var Host = _configuration.GetValue <string> ("EMAIL_CONFIGURATION:HOST");
-        var port = _configuration.GetValue <int> ("EMAIL_CONFIGURATION:PORT");
+    public async Task SendEmail(string receptor, string subject, string body)
+    {
+        var email = _configuration.GetValue<string>("EMAIL_CONFIGURATION:EMAIL");
+        var password = _configuration.GetValue<string>("EMAIL_CONFIGURATION:PASSWORD");
+        var Host = _configuration.GetValue<string>("EMAIL_CONFIGURATION:HOST");
+        var port = _configuration.GetValue<int>("EMAIL_CONFIGURATION:PORT");
 
 
         var smtpClient = new SmtpClient(Host, port);
@@ -24,7 +25,10 @@ public class EmailServices: IEmailService
         smtpClient.UseDefaultCredentials = false;
         smtpClient.Credentials = new NetworkCredential(email, password);
 
-        var message = new MailMessage(email!, receptor, subject, body);
+        var message = new MailMessage(email!, receptor, subject, body)
+        {
+            IsBodyHtml = true // 
+        }; 
         await smtpClient.SendMailAsync(message);
     }
 }
