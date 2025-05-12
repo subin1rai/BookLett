@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toast } from "react-toastify";
 import apiClient from "../../../api/axios";
 
-const OrderVerify = ({ order, onClose }) => {
+const OrderVerify = ({ order, onClose, onVerified }) => {
   const [claimCode, setClaimCode] = useState("");
 
   const handleVerify = async () => {
@@ -26,6 +26,7 @@ const OrderVerify = ({ order, onClose }) => {
       if (data.status === "success") {
         toast.success("Order verified successfully");
         onClose();
+        onVerified();
       } else {
         toast.error(data.message || "Verification failed");
       }

@@ -8,9 +8,14 @@ import { AppContext } from "../../../context/AppContext";
 
 const BookCard = ({ book }) => {
   const [wish, setWish] = useState(false);
+
   const [timeLeft, setTimeLeft] = useState(null);
   const [showSale, setShowSale] = useState(false);
   const { addToCart, fetchWishlist, setWishlist, checkLogged } = useContext(AppContext);
+
+  const { addToCart, fetchWishlist, setWishlist, checkLogged } =
+    useContext(AppContext);
+console.log("books", book)
 
   const token = localStorage.getItem("token");
   const bookId = book.bookId;
@@ -130,7 +135,7 @@ const BookCard = ({ book }) => {
       <div className="relative mb-2 ">
         <Link to={`/bookDetails/${book.bookId}`} state={{ book }}>
           <img
-            src={book.imageUrl ? book.imageUrl : images.book1}
+            src={book.imageUrl? book.imageUrl : images.book2}
             alt={book.title}
             className="w-full h-[386px] object-cover rounded-[20px]"
           />

@@ -6,10 +6,16 @@ export const AppContext = createContext();
 
 export const AppContextProvider = (props) => {
   const [allBooks, setAllBooks] = useState([]);
+  const [comingSoon, setComingSoon] = useState([]);
+  const [bestSeller, setBestSeller] = useState([]);
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState("");
   const [showSignUp, setShowSignUp] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
+  const [showVerification, setShowVerification] = useState({
+    show: false,
+    userId: null,
+  });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const checkLogged = () => {
@@ -36,6 +42,18 @@ export const AppContextProvider = (props) => {
     }
   };
 
+  const fetchBestSeller = async () => {
+    try {
+      const { data } = await apiClient.get("/book/bestSeller");
+      console.log("bestSeller", data)
+      if (data.code == 200) {
+        setBestSeller(data.data);
+      }
+    } catch (error) {
+      console.log("Error fetching book");
+    }
+  };
+
   const fetchBooks = async () => {
     try {
       const { data } = await apiClient.get("/book/all");
@@ -43,7 +61,12 @@ export const AppContextProvider = (props) => {
       const sortedBooks = data.data.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
-      setAllBooks(sortedBooks);
+
+      const onSaleBooks = sortedBooks.filter((book) => book.isOnSale);
+      const upcomingBooks = sortedBooks.filter((book) => !book.isOnSale);
+
+      setAllBooks(onSaleBooks);
+      setComingSoon(upcomingBooks);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
@@ -108,11 +131,14 @@ export const AppContextProvider = (props) => {
 
   useEffect(() => {
     fetchBooks();
+    fetchBestSeller();
     checkLogged();
   }, []);
 
   const value = {
     allBooks,
+    comingSoon,
+    bestSeller,
     cart,
     wishlist,
     setWishlist,
@@ -124,6 +150,8 @@ export const AppContextProvider = (props) => {
     setShowSignIn,
     showSignUp,
     setShowSignUp,
+    showVerification,
+    setShowVerification,
     isLoggedIn,
     checkLogged,
   };
