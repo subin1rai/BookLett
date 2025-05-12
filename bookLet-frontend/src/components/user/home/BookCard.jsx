@@ -184,7 +184,9 @@ const BookCard = ({ book }) => {
           <span className="font-bold">
             Rs {book.price - (book.discount * book.price) / 100}
           </span>
+        {showSale && (
           <span className="text-orange-500 font-bold">{book.discount}% Off</span>
+        )}  
         </div>
       </div>
 

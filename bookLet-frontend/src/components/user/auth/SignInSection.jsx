@@ -31,7 +31,7 @@ const SignInSection = ({ onClose, setShowSignUp }) => {
         toast.success(data.message || "Login successful !!!!!");
         onClose();
         await checkLogged();
-        getCart();
+        console.log(data.user.role)
         localStorage.setItem("token", data.token);
         localStorage.setItem("role", data.user.role);
         window.dispatchEvent(new Event("storage"));
@@ -44,6 +44,7 @@ const SignInSection = ({ onClose, setShowSignUp }) => {
     } catch (error) {
       const errorMessage =
         error.response?.data || "An unexpected error occurred during login.";
+        toast.warn(errorMessage);
       console.log(errorMessage);
     }
   };

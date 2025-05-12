@@ -26,7 +26,7 @@ const NavBar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { cart } = useContext(AppContext) || { cart: [] };
+  const [userData, setUserData] = useState({});
 
   const getBanner = async () => {
     try {
@@ -373,7 +373,7 @@ const NavBar = () => {
                         Your Profile
                       </NavLink>
                       <NavLink
-                        to="/orders"
+                        to="/myOrders"
                         className="flex flex-row gap-2  px-4 py-2 text-sm text-gray-300 hover:bg-gray-100"
                         onClick={() => setMenuOpen(false)}
                       >
