@@ -40,6 +40,7 @@ const NavBar = () => {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [elapsedTime, setElapsedTime] = useState("");
+  const [letter, setLetter] = useState("");
 
   const fetchNotification = async () => {
     try {
@@ -68,8 +69,11 @@ const NavBar = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log(data);
+      console.log("USerdata", data);
       setUserData(data);
+
+      const initial = data.username.charAt(0).toUpperCase() || "?";
+      setLetter(initial);
     } catch (error) {
       console.log("Failed to fetch user");
     }
@@ -221,7 +225,7 @@ const NavBar = () => {
       )}
 
       {/* Main Navigation */}
-      <div className="w-full py-4 pl-24">
+      <div className="w-full py-4 pl-24 pr-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center">
@@ -459,9 +463,18 @@ const NavBar = () => {
               aria-expanded={menuOpen}
               aria-label="User menu"
             >
-              <img src={images.user_icon} className="h-10" alt="" />
+              {!isLoggedIn ? (
+                <img
+                  src={images.user_icon}
+                  className="h-10 w-10 rounded-full"
+                  alt="User Icon"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg">
+                  {letter}
+                </div>
+              )}
             </button>
-
             {menuOpen && (
               <>
                 {/* Full-screen overlay to darken background */}
@@ -471,7 +484,17 @@ const NavBar = () => {
                   <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
                     <div>
                       <div className="text-lg items-center font-semibold text-gray-200 flex flex-row gap-2">
-                        <CircleUserRound className="text-web-primary h-8 w-8" />{" "}
+                        {!isLoggedIn ? (
+                          <img
+                            src={images.user_icon}
+                            className="h-10 w-10 rounded-full"
+                            alt="User Icon"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-lg">
+                            {letter}
+                          </div>
+                        )}{" "}
                         {isLoggedIn ? `${userData.username}` : "Guest User"}
                       </div>
                       <div className="text-sm text-gray-100 mt-1">
@@ -515,7 +538,7 @@ const NavBar = () => {
                         Your Profile
                       </NavLink>
                       <NavLink
-                        to="/orders"
+                        to="/myOrders"
                         className="flex flex-row gap-2  px-4 py-2 text-sm text-gray-300 hover:bg-gray-100"
                         onClick={() => setMenuOpen(false)}
                       >

@@ -83,7 +83,7 @@ const BookList = () => {
           <hr />
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-7">
             {allBooks.map((book) => (
-              <BookCard key={book.bookId} book={book} />
+              <BookCard key={book.bookId} book={book} show={true}/>
             ))}
           </div>
 
