@@ -140,7 +140,65 @@ namespace BookLibrary.Controllers
             });
         }
 
+[HttpGet("getAllUsers")]
+        [Authorize(Policy = "RequireStaffRole")]
+        public async Task<ActionResult<object>> Get(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? search = null)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    code = 400,
+                    message = "Page and pageSize must be greater than 0"
+                });
+            }
 
+            // ✅ Filter only users with "User" role
+            var query = _context.Users
+                .Where(u => u.Role == "User");
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Username.Contains(search) ||
+                    u.Email.Contains(search));
+            }
+
+            // Apply ordering - newest first
+            query = query.OrderByDescending(u => u.CreatedAt);
+
+            var totalUsers = await query.CountAsync();
+
+            var users = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var userDtos = users.Select(u => new UserDTO
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                Role = u.Role,
+                CreatedAt = u.CreatedAt,
+                IsVerified= u.IsVerified
+            }).ToList();
+
+            return Ok(new
+            {
+                status = "success",
+                currentPage = page,
+                pageSize,
+                totalCount = totalUsers,
+                totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize),
+                data = userDtos
+            });
+        }
 
         [HttpGet("getuserbyid/{id}")]
         public async Task<ActionResult<UserDTO>> GetUser(Guid id)
