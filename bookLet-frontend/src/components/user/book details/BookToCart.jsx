@@ -31,7 +31,7 @@ const BookToCart = ({ book }) => {
     <div className="border p-3 rounded-lg border-gray-100">
       <div className="h-[200px] w-[270px] overflow-hidden rounded-xl mb-3">
         <img
-          className="h-[200px] w-[270px]"
+          className="w-[270px]"
           src={book.imageUrl}
           alt={book.title}
         />

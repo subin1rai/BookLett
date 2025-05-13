@@ -8,6 +8,7 @@ export const AppContextProvider = (props) => {
   const [allBooks, setAllBooks] = useState([]);
   const [comingSoon, setComingSoon] = useState([]);
   const [bestSeller, setBestSeller] = useState([]);
+  const [deals, setDeals] = useState([]);
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState("");
   const [showSignUp, setShowSignUp] = useState(false);
@@ -45,7 +46,7 @@ export const AppContextProvider = (props) => {
   const fetchBestSeller = async () => {
     try {
       const { data } = await apiClient.get("/book/bestSeller");
-      console.log("bestSeller", data)
+      console.log("bestSeller", data);
       if (data.code == 200) {
         setBestSeller(data.data);
       }
@@ -57,16 +58,24 @@ export const AppContextProvider = (props) => {
   const fetchBooks = async () => {
     try {
       const { data } = await apiClient.get("/book/all");
-
       const sortedBooks = data.data.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
       );
 
+      const now = new Date();
+
       const onSaleBooks = sortedBooks.filter((book) => book.isOnSale);
       const upcomingBooks = sortedBooks.filter((book) => !book.isOnSale);
 
+      const deal = onSaleBooks.filter((book) => {
+        const start = new Date(book.startTime);
+        const end = new Date(book.endTime);
+        return book.isOnSale && start <= now && now <= end;
+      });
+
       setAllBooks(onSaleBooks);
       setComingSoon(upcomingBooks);
+      setDeals(deal);
     } catch (error) {
       console.error("Error fetching books:", error);
     }
@@ -139,6 +148,7 @@ export const AppContextProvider = (props) => {
     allBooks,
     comingSoon,
     bestSeller,
+    deals,
     cart,
     wishlist,
     setWishlist,

@@ -6,6 +6,7 @@ import DealSection from "../../components/user/home/DealSection";
 import BannerSection from "../../components/user/home/BannerSection";
 import ContactSection from "../../components/user/home/ContactSection";
 import BestSelling from "../../components/user/home/BestSelling";
+import ComingSoon from "../../components/user/home/ComingSoon";
 
 const Home = () => {
   return (
@@ -15,6 +16,7 @@ const Home = () => {
           <HeroSection />
           <GenreSection />
           <BookSection />
+          <ComingSoon />
           <BestSelling />
           <DealSection />
         </div>
