@@ -2,7 +2,7 @@
 builder = "dockerfile"
 dockerfilepath = "./BookLibrary/Dockerfile"
 
-[Deploy]
-startCommand = "./BookLibrary"
+[deploy]
+startCommand = "dotnet BookLibrary.dll"
 restartPolicyType = "always"
 healthCheckPath = "/health"
