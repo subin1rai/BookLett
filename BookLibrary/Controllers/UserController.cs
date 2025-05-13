@@ -184,11 +184,10 @@ namespace BookLibrary.Controllers
         public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] string role)
         {
             // Validate role
-            if (role != "Admin" && role != "User")
+            if (role != "Admin" && role != "User" && role != "Staff")
             {
                 return BadRequest("Invalid role. Role must be 'Admin' or 'User'");
             }
-
             // Find user by ID
             var user = await _context.Users.FindAsync(id);
             if (user == null)
