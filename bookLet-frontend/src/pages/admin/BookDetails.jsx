@@ -327,7 +327,7 @@ const BookDetail = () => {
                 <div className="flex gap-4 mt-8">
                   <button
                     onClick={() => setShowDiscount(true)}
-                    className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md flex items-center"
+                    className="px-6 py-3 bg-web-offer text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-md flex items-center"
                   >
                     <Timer />
                     Add Timed Discount
@@ -454,7 +454,7 @@ const BookDetail = () => {
           </div>
         </div>
 
-        {setShowDiscount && (
+        {showDiscount && (
           <DealsDiscount
             bookId={bookId}
             onClose={() => setShowDiscount(false)}
