@@ -17,7 +17,7 @@ public class EmailServices : IEmailService
         var apiKey = _config["SendGrid:ApiKey"];
         var client = new SendGridClient(apiKey);
 
-        var from = new EmailAddress("your_verified_sender@example.com", "Booklett");
+        var from = new EmailAddress("onsiteapp.np@gmail.com", "Booklett");
         var to = new EmailAddress(toEmail);
         var msg = MailHelper.CreateSingleEmail(from, to, subject, body, body);
 
