@@ -66,7 +66,7 @@ const BookCard = ({ book, show, isSoon }) => {
     try {
       const { data } = await apiClient.delete(
         `/book/remove/${bookId}`,
-        {},
+        
         {
           headers: {
             Authorization: `Bearer ${token}`,
