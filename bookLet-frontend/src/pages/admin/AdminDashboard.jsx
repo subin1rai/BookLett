@@ -183,7 +183,7 @@ const AdminDashboard = () => {
               </h2>
             </div>
             <div className="space-y-5">
-              <div className="flex items-start">
+              <div className="flex flex-col items-start">
                 {notifications.map((notices) => (
                   <div className="flex items-start">
                     <div className="bg-blue-100 rounded-full p-2 mr-4">
