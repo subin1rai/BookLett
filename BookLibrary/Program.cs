@@ -9,7 +9,7 @@ using Microsoft.OpenApi.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5202";
-builder.WebHost.UseUrls($"http://*:{port}");
+builder.WebHost.UseUrls($"https://*:{port}");
 
 // Load from environment variables
 builder.Configuration
