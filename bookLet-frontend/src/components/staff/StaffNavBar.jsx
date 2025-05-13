@@ -1,24 +1,12 @@
 import React from "react";
-import {
-  LogOut,
-  List,
-  Book,
-  ShoppingBag,
-  User,
-  Users,
-  ListCheck,
-  Settings,
-  ScrollText,
-} from "lucide-react";
+import { LogOut, List, ShoppingBag } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import images from "../../assets/assets";
 
 const StaffNavBar = () => {
   const menuItems = [
     { name: "Dashboard", path: "/staff", icons: List },
-    { name: "Orders", path: "/staff/orders", icons: ShoppingBag },
-    { name: "Customers", path: "/staff/customers", icons: User },
-    { name: "Settings", path: "/staff/settings", icons: Settings },
+    { name: "Orders", path: "/staff/Orders", icons: ShoppingBag },
   ];
 
   return (

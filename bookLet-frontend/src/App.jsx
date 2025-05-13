@@ -15,7 +15,6 @@ import Cart from "./pages/user/Cart";
 import Banner from "./pages/admin/Banner";
 import Footer from "./components/user/Footer";
 import Staff from "./pages/staff/Staff";
-import StaffDashboard from "./pages/staff/StaffDashboard";
 import StaffOrder from "./pages/staff/StaffOrder";
 import BookDetails from "./pages/user/BookDetails";
 import AuthenticatedRoute from "./components/basic components/AuthenticatedRoute";
@@ -67,7 +66,7 @@ const App = () => {
           <Route path="/admin/books/view/:bookId" element={<BookDetail />} />
         </Route>
         <Route path="/staff" element={<Staff />}>
-          <Route path="/staff" element={<StaffDashboard />} />
+          <Route path="/staff" element={<AdminDashboard />} />
           <Route path="/staff/orders" element={<StaffOrder />} />
         </Route>
       </Routes>
