@@ -31,7 +31,7 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // Required for SignalR
+             .AllowCredentials(); // Required for SignalR
     });
 });
 
