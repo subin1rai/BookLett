@@ -122,7 +122,7 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <p className="text-gray-600">
             Welcome back,{" "}
-            <span className="text-lg text-blue-600 font-bold">Admin</span>!
+            <span className="text-lg text-blue-600 font-bold">User</span>!
             Here's what's happening with your store today.
           </p>
         </div>
@@ -183,7 +183,7 @@ const AdminDashboard = () => {
               </h2>
             </div>
             <div className="space-y-5">
-              <div className="flex flex-col items-start">
+              <div className="flex flex-col gap-2 items-start">
                 {notifications.map((notices) => (
                   <div className="flex items-start">
                     <div className="bg-blue-100 rounded-full p-2 mr-4">
