@@ -11,6 +11,12 @@ var builder = WebApplication.CreateBuilder(args);
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5202";
 builder.WebHost.UseUrls($"http://*:{port}");
 
+// Load from environment variables
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true)
+    .AddEnvironmentVariables();
+    
 builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
