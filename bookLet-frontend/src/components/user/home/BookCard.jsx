@@ -64,7 +64,7 @@ const BookCard = ({ book, show, isSoon }) => {
 
   const removeWish = async () => {
     try {
-      const { data } = await apiClient.put(
+      const { data } = await apiClient.delete(
         `/book/remove/${bookId}`,
         {},
         {
