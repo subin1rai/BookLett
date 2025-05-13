@@ -390,5 +390,157 @@ namespace BookLibrary.Controllers
             });
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult> SearchBooks(
+            [FromQuery] string? searchTerm = null,
+            [FromQuery] string? genre = null,
+            [FromQuery] string? author = null,
+            [FromQuery] string? publisher = null,
+            [FromQuery] string? language = null,
+            [FromQuery] decimal? minPrice = null,
+            [FromQuery] decimal? maxPrice = null,
+            [FromQuery] bool? availableInLibrary = null,
+            [FromQuery] bool? isOnSale = null,
+            [FromQuery] string? sortBy = "title",
+            [FromQuery] bool sortDesc = false,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    code = 400,
+                    message = "Page and pageSize must be greater than 0"
+                });
+            }
+
+            // Include ratings and users
+            var query = _context.Books
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.User)
+                .AsQueryable();
+
+            // Apply search filters
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                query = query.Where(b =>
+                    b.Title.ToLower().Contains(searchTerm.ToLower()) ||
+                    b.Author.ToLower().Contains(searchTerm.ToLower()) ||
+                    b.Description.ToLower().Contains(searchTerm.ToLower()) ||
+                    b.ISBN.ToLower().Contains(searchTerm.ToLower()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(genre))
+            {
+                query = query.Where(b => b.Genre.ToLower() == genre.ToLower());
+            }
+
+            if (!string.IsNullOrWhiteSpace(author))
+            {
+                query = query.Where(b => b.Author.ToLower().Contains(author.ToLower()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(publisher))
+            {
+                query = query.Where(b => b.Publisher.ToLower().Contains(publisher.ToLower()));
+            }
+
+            if (!string.IsNullOrWhiteSpace(language))
+            {
+                query = query.Where(b => b.Language.ToLower() == language.ToLower());
+            }
+
+            if (minPrice.HasValue)
+            {
+                query = query.Where(b => b.Price >= minPrice.Value);
+            }
+
+            if (maxPrice.HasValue)
+            {
+                query = query.Where(b => b.Price <= maxPrice.Value);
+            }
+
+            if (availableInLibrary.HasValue)
+            {
+                query = query.Where(b => b.AvailableInLibrary == availableInLibrary.Value);
+            }
+
+            if (isOnSale.HasValue)
+            {
+                query = query.Where(b => b.IsOnSale == isOnSale.Value);
+            }
+
+            // Apply sorting
+            query = sortBy.ToLower() switch
+            {
+                "price" => sortDesc ? query.OrderByDescending(b => b.Price) : query.OrderBy(b => b.Price),
+                "createdat" => sortDesc ? query.OrderByDescending(b => b.CreatedAt) : query.OrderBy(b => b.CreatedAt),
+                "title" => sortDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title),
+                "author" => sortDesc ? query.OrderByDescending(b => b.Author) : query.OrderBy(b => b.Author),
+                "genre" => sortDesc ? query.OrderByDescending(b => b.Genre) : query.OrderBy(b => b.Genre),
+                _ => sortDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title)
+            };
+
+            var totalBooks = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
+
+            var books = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var bookDtos = books.Select(b => new
+            {
+                b.BookId,
+                b.Title,
+                b.Author,
+                b.Genre,
+                b.ISBN,
+                b.Description,
+                b.Publisher,
+                b.PublicationDate,
+                b.Price,
+                b.Quantity,
+                b.Language,
+                b.Discount,
+                b.Format,
+                b.ImageUrl,
+                b.AvailableInLibrary,
+                b.IsOnSale,
+                b.StartTime,
+                b.EndTime,
+                b.CreatedAt,
+                AverageStars = b.Reviews != null && b.Reviews.Any()
+                    ? Math.Round(b.Reviews.Average(r => r.Stars), 1)
+                    : 0,
+                Reviews = b.Reviews?.Select(r => new ReviewDTO
+                {
+                    ReviewId = r.ReviewId,
+                    BookId = r.BookId,
+                    UserId = r.UserId,
+                    Username = r.User != null ? r.User.Username : "Anonymous",
+                    Stars = r.Stars,
+                    Comment = r.Comment
+                }).ToList() ?? new List<ReviewDTO>()
+            });
+
+            return Ok(new
+            {
+                status = "success",
+                code = 200,
+                message = "Books retrieved successfully",
+                pagination = new
+                {
+                    currentPage = page,
+                    pageSize = pageSize,
+                    totalPages,
+                    totalItems = totalBooks
+                },
+                data = bookDtos
+            });
+        }
+
     }
 }
