@@ -142,7 +142,7 @@ namespace BookLibrary.Controllers
 
 [HttpGet("getAllUsers")]
         [Authorize(Policy = "RequireStaffRole")]
-        public async Task<ActionResult<object>> Get(
+        public async Task<ActionResult<object>> GetUser(
     [FromQuery] int page = 1,
     [FromQuery] int pageSize = 10,
     [FromQuery] string? search = null)
