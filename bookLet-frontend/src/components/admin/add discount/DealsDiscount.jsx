@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import apiClient from "../../../api/axios";
 
-const DealsDiscount = ({ bookId }) => {
+const DealsDiscount = ({ bookId, onClose }) => {
   const [formData, setFormData] = useState({
     discountPercentage: "",
     startDate: "",
@@ -28,6 +28,7 @@ const DealsDiscount = ({ bookId }) => {
           },
         }
       );
+      onClose();
     } catch (error) {
       console.log("Failed to add timed discount");
     }
