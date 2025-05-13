@@ -33,7 +33,8 @@ const BookDetails = () => {
 
       if (data.statusCode === 200) {
         toast.success("Review submitted successfully!");
-        setReviews((prev) => [data.data, ...prev]); // Update UI without refetch
+        setReviews((prev) => [data.data, ...prev]);
+        fetchReview();
       } else {
         toast.error(data.message || "Something went wrong");
       }
@@ -104,6 +105,7 @@ const BookDetails = () => {
             ) : (
               reviews
                 .slice(0, 5)
+                .filter((review) => review && review.reviewId)
                 .map((review) => (
                   <RatingReview key={review.reviewId} review={review} />
                 ))

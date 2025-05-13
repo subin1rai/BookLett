@@ -1,5 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
-import apiClient from "../../api/axios";
+import { useContext, useEffect } from "react";
 import Loading from "../../components/basic components/Loading";
 import BookCard from "../../components/user/home/BookCard";
 import { AppContext } from "../../context/AppContext";
