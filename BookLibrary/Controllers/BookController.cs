@@ -146,7 +146,7 @@ namespace BookLibrary.Controllers
 
         [HttpPut("updatebook/{id}")]
         [Authorize(Policy = "RequireAdminRole")]
-        public async Task<IActionResult> UpdateBook(Guid id, [FromForm] CreateBookDTO updateBook,   IFormFile image,
+        public async Task<IActionResult> UpdateBook(Guid id, [FromForm] CreateBookDTO updateBook, IFormFile image,
             [FromServices] CloudinaryService cloudinaryService)
         {
             var book = await _context.Books.FindAsync(id);

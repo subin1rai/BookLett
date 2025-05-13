@@ -1,4 +1,5 @@
 using System;
+using BookLibrary.DTOs.Request;
 
 namespace BookLibrary.DTOs.Response;
 
@@ -14,9 +15,9 @@ public class BookDTO
     public string Publisher { get; set; } = string.Empty;
 
     public DateTime PublicationDate { get; set; }
-    public bool  AwardWinners {get; set;} 
+    public bool AwardWinners { get; set; }
 
-    public int Price { get; set; }
+    public int Price { get; set; } = 0;
 
     public int Quantity { get; set; }
     public string Language { get; set; }
@@ -28,10 +29,14 @@ public class BookDTO
     public bool AvailableInLibrary { get; set; } = true;
 
     public bool IsOnSale { get; set; } = false;
-    
-    public DateTime? StartTime {get; set;}
-    public DateTime? EndTime {get; set;}
+
+    public DateTime? StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+    public double? AverageRating { get; set; }
+
+    public double Rating { get; set; }                      // ⭐ Average rating
+    public List<ReviewDTO> Reviews { get; set; }
+
 }

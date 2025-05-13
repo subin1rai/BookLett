@@ -1807,6 +1807,88 @@
       ]
     },
     {
+      "Route": "uploads/79cbfdeb-d79a-4f73-acff-0d30344bdc9b.jpeg",
+      "AssetFile": "uploads/79cbfdeb-d79a-4f73-acff-0d30344bdc9b.jpeg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=3600, must-revalidate"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "69873"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"BVSzb25ccD7b2AdLKDAl5llsGcNHbnGWCw+6SCyHJik=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 12 May 2025 16:34:11 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-BVSzb25ccD7b2AdLKDAl5llsGcNHbnGWCw+6SCyHJik="
+        }
+      ]
+    },
+    {
+      "Route": "uploads/79cbfdeb-d79a-4f73-acff-0d30344bdc9b.zeu4djmm5u.jpeg",
+      "AssetFile": "uploads/79cbfdeb-d79a-4f73-acff-0d30344bdc9b.jpeg",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "69873"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "image/jpeg"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"BVSzb25ccD7b2AdLKDAl5llsGcNHbnGWCw+6SCyHJik=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Mon, 12 May 2025 16:34:11 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "zeu4djmm5u"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-BVSzb25ccD7b2AdLKDAl5llsGcNHbnGWCw+6SCyHJik="
+        },
+        {
+          "Name": "label",
+          "Value": "uploads/79cbfdeb-d79a-4f73-acff-0d30344bdc9b.jpeg"
+        }
+      ]
+    },
+    {
       "Route": "uploads/86ea8d5b-5a20-4ab9-951f-5bbb88247bf8.fix9dpracr.webp",
       "AssetFile": "uploads/86ea8d5b-5a20-4ab9-951f-5bbb88247bf8.webp",
       "Selectors": [],
