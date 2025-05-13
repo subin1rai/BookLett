@@ -230,23 +230,21 @@ const AddBooks = () => {
           <div className="mb-6 grid md:grid-cols-3 gap-9">
             {toggleButtons.map(({ name, label, description }) => (
               <div key={name} className="flex flex-col items-start">
-                <label className="block text-[#435058] font-medium mb-2">
-                  {label}
-                </label>
                 <button
                   type="button"
                   onClick={() => handleToggle(name)}
                   className={`
-                    w-full p-3 rounded-md transition-colors duration-300 
-                    ${
-                      formData[name]
-                        ? "bg-web-primary"
-                        : "bg-gray-200 text-gray-700"
-                    }
-                  `}
+    w-full p-3 rounded-md transition-colors duration-300 
+    ${
+      formData[name]
+        ? "bg-[#EBFF94] text-gray-700 border-2 border-web-primary"
+        : "bg-gray-200 text-gray-700"
+    }
+  `}
                 >
-                  {formData[name] ? "True" : "False"}
+                  {`${label}`}
                 </button>
+
                 <p className="text-xs font-semibold text-gray-500 mt-1">
                   {description}
                 </p>

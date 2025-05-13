@@ -8,7 +8,7 @@ const BannerSection = () => {
         <img src={images.banner} alt="banner" className="w-[50%]" />
 
         <div className="w-[50%]  p-8 ">
-          <h1 className="text-center font-bold text-4xl ">Why Shop with Us?</h1>
+          <h1 className="text-center font-bold text-5xl ">Why Shop with Us?</h1>
           <p className="text-center text-xl mt-4 w-[80%] mx-auto">
             We are committed to providing our customers with the best possible
             shopping experience. Our team is dedicated to ensuring that you find
