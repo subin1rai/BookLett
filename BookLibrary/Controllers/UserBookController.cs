@@ -261,7 +261,6 @@ namespace BookLibrary.Controllers
             var wishlist = await _context.Whitelists
             .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == bookId);
 
-            if (wishlist == null)
             {
                 return Ok(new
                 {
@@ -315,5 +314,62 @@ namespace BookLibrary.Controllers
 
             return Ok(bookDtos);
         }
+
+        [HttpGet("bestSeller")]
+public async Task<IActionResult> GetBestSellers()
+{
+    var bestSellingBooks = await _context.OrderItems
+        .GroupBy(oi => oi.BookId)
+        .Select(group => new
+        {
+            BookId = group.Key,
+            OrderCount = group.Count()
+        })
+        .OrderByDescending(g => g.OrderCount)
+        .Take(10) // Top 10 bestsellers, you can adjust this
+        .ToListAsync();
+
+    var bookIds = bestSellingBooks.Select(b => b.BookId).ToList();
+
+    var books = await _context.Books
+        .Where(b => bookIds.Contains(b.BookId))
+        .ToListAsync();
+
+    var result = bestSellingBooks
+        .Join(books, b => b.BookId, book => book.BookId, (b, book) => new
+        {
+            book = new BookDTO
+            {
+                BookId = book.BookId,
+                Title = book.Title,
+                Author = book.Author,
+                Genre = book.Genre,
+                ISBN = book.ISBN,
+                Description = book.Description,
+                Publisher = book.Publisher,
+                PublicationDate = book.PublicationDate,
+                Price = book.Price,
+                Quantity = book.Quantity,
+                Language = book.Language,
+                Discount = book.Discount,
+                Format = book.Format,
+                ImageUrl = book.ImageUrl,
+                AvailableInLibrary = book.AvailableInLibrary,
+                IsOnSale = book.IsOnSale
+            },
+            orderCount = b.OrderCount
+        })
+        .OrderByDescending(x => x.orderCount)
+        .ToList();
+
+    return Ok(new
+    {
+        status = "success",
+        code = 200,
+        message = "Top selling books fetched successfully",
+        data = result
+    });
+}
+
     }
 }

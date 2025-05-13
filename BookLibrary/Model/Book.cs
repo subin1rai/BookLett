@@ -27,7 +27,7 @@ public class Book
 
 
     [Required(ErrorMessage = "Description is required")]
-    [StringLength(500, ErrorMessage = "Description cannot be longer than 500 characters")]
+    [StringLength(2000, ErrorMessage = "Description cannot be longer than 500 characters")]
     public string Description { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Publisher is required")]
@@ -56,7 +56,7 @@ public class Book
     [Required(ErrorMessage = "Discount is required")]
     [Range(0, 100, ErrorMessage = "Discount must be between 0 and 100")]
     [Display(Name = "Discount (%)")]  
-    public int Discount { get; set; } = 0;
+    public int Discount { get; set; }
     
     [Required(ErrorMessage = "Language is required")]
     public string Language { get; set; }  = string.Empty;
@@ -64,6 +64,8 @@ public class Book
     public bool AvailableInLibrary { get; set; } = true;
 
     public bool IsOnSale { get; set; } = false; 
+    public bool  AwardWinners {get; set;} = false;
+    
     public DateTime? StartTime {get; set;}
     public DateTime? EndTime {get; set;}
 

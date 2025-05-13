@@ -71,13 +71,16 @@ namespace BookLibrary.Migrations
                     b.Property<bool>("AvailableInLibrary")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("AwardWinners")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<int>("Discount")
                         .HasColumnType("integer");

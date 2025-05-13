@@ -13,6 +13,8 @@ public class OrderDTO
     public decimal OriginalTotal { get; set; }
 
     public decimal DiscountRate { get; set; }
+    public bool  AwardWinners {get; set;} 
+
     public decimal FinalTotal { get; set; }
 
     public string Status { get; set; } = "Pending";
@@ -20,8 +22,8 @@ public class OrderDTO
 
     public List<OrderItemDTO> OrderItems { get; set; } = new();
 
-    public string Username { get; set; }
-    public List<string> BookTitles { get; set; }
+    public string? Username { get; set; }
+    public List<string>? BookTitles { get; set; }
 }
 
 

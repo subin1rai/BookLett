@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BookLibrary.Controllers
 {
-    [Route("user")]
+    [Route("api/user")]
     [ApiController]
     [Authorize] // All endpoints require authentication
     public class UserController : ControllerBase
@@ -21,34 +21,136 @@ namespace BookLibrary.Controllers
         }
 
 
-        [HttpGet]
         [HttpGet("getallusers")]
         [Authorize(Policy = "RequireAdminRole")]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
+        public async Task<ActionResult<object>> GetUsers(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? search = null)
         {
-            var users = await _context.Users.ToListAsync();
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    code = 400,
+                    message = "Page and pageSize must be greater than 0"
+                });
+            }
 
-            // Map users to UserDTO
+            var query = _context.Users
+                .Where(u => u.Role != "Admin");
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Username.Contains(search) ||
+                    u.Email.Contains(search));
+            }
+
+            // Apply ordering - newest first
+            query = query.OrderByDescending(u => u.CreatedAt);
+
+            var totalUsers = await query.CountAsync();
+
+            var users = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
             var userDtos = users.Select(u => new UserDTO
             {
                 Id = u.Id,
                 Username = u.Username,
                 Email = u.Email,
-                Role = u.Role
+                Role = u.Role,
+                CreatedAt = u.CreatedAt,
+                IsVerified= u.IsVerified
             }).ToList();
 
-            return userDtos;
+            return Ok(new
+            {
+                status = "success",
+                currentPage = page,
+                pageSize,
+                totalCount = totalUsers,
+                totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize),
+                data = userDtos
+            });
         }
 
+        [HttpGet("getAllStaffs")]
+        [Authorize(Policy = "RequireAdminRole")]
+        public async Task<ActionResult<object>> GetStaffs(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? search = null)
+        {
+            if (page <= 0 || pageSize <= 0)
+            {
+                return BadRequest(new
+                {
+                    status = "error",
+                    code = 400,
+                    message = "Page and pageSize must be greater than 0"
+                });
+            }
+
+            // ✅ Filter only users with "Staff" role
+            var query = _context.Users
+                .Where(u => u.Role == "Staff");
+
+            // Apply search filter
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(u =>
+                    u.Username.Contains(search) ||
+                    u.Email.Contains(search));
+            }
+
+            // Apply ordering - newest first
+            query = query.OrderByDescending(u => u.CreatedAt);
+
+            var totalUsers = await query.CountAsync();
+
+            var users = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var userDtos = users.Select(u => new UserDTO
+            {
+                Id = u.Id,
+                Username = u.Username,
+                Email = u.Email,
+                Role = u.Role,
+                CreatedAt = u.CreatedAt,
+                IsVerified= u.IsVerified
+            }).ToList();
+
+            return Ok(new
+            {
+                status = "success",
+                currentPage = page,
+                pageSize,
+                totalCount = totalUsers,
+                totalPages = (int)Math.Ceiling(totalUsers / (double)pageSize),
+                data = userDtos
+            });
+        }
+
+
+
         [HttpGet("getuserbyid/{id}")]
-        public async Task<ActionResult<UserDTO>> GetUser(int id)
+        public async Task<ActionResult<UserDTO>> GetUser(Guid id)
         {
             // Get the current user's ID and role from the token
             var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
 
             if (userClaim == null) return Unauthorized("Invalid!! Token is missing");
 
-            var userId = int.Parse(userClaim.Value);
+            var userId = Guid.Parse(userClaim.Value);
 
             var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
 
@@ -126,7 +228,7 @@ namespace BookLibrary.Controllers
         [HttpGet]
         [Authorize(Policy = "RequireUserRole")]
         public async Task<ActionResult> GetDiscount()
-        {   
+        {
             var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
             if (userClaim == null)
                 return Unauthorized("Invalid! Token is missing");

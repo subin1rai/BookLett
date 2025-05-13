@@ -16,6 +16,7 @@ public class CreateBookDTO
 
     // [Required(ErrorMessage = "Genre is required")]
     public string Genre { get; set; } = string.Empty;
+    public bool  AwardWinners {get; set;} 
 
 
     // [Required(ErrorMessage = "ISBN is required")]
