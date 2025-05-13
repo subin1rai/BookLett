@@ -1,3 +1,4 @@
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -42,8 +43,8 @@ namespace BookLibrary.Controllers
                     n.CreatedAt
                 })
                 .ToListAsync();
-
-            // Weekly sales data (last 7 days, grouped by DayOfWeek)
+            //commit comments
+            // Weekly order counts for past 7 days
             var last7Days = DateTime.UtcNow.Date.AddDays(-6);
             var weeklyOrders = await _context.Orders
                 .Where(o => o.OrderDate.Date >= last7Days)
@@ -55,13 +56,42 @@ namespace BookLibrary.Controllers
                 })
                 .ToListAsync();
 
-            // Ensure all 7 days are included in result (Sun to Sat)
             var daysOfWeek = Enum.GetValues(typeof(DayOfWeek)).Cast<DayOfWeek>();
             var weeklySales = daysOfWeek.Select(day => new
             {
-                day = day.ToString().Substring(0, 3), // "Sun", "Mon", etc.
+                day = day.ToString().Substring(0, 3),
                 count = weeklyOrders.FirstOrDefault(x => x.Day == day)?.Count ?? 0
             });
+
+            // Top 3 recent orders with basic user info
+            var recentOrders = await _context.Orders
+                .OrderByDescending(o => o.OrderDate)
+                .Take(3)
+                .Include(o => o.User)
+                .Select(o => new
+                {
+                    o.OrderId,
+                    o.OrderDate,
+                    o.FinalTotal,
+                    o.Status,
+                    Username = o.User.Username,
+                    Email = o.User.Email
+                })
+                .ToListAsync();
+
+            // Top 3 recently added books
+            var recentBooks = await _context.Books
+                .OrderByDescending(b => b.CreatedAt) // Assuming Book has CreatedAt
+                .Take(3)
+                .Select(b => new
+                {
+                    b.BookId,
+                    b.Title,
+                    b.Author,
+                    b.Price,
+                    b.CreatedAt
+                })
+                .ToListAsync();
 
             return Ok(new
             {
@@ -70,8 +100,12 @@ namespace BookLibrary.Controllers
                 totalCustomers,
                 totalRevenue,
                 recentNotifications,
-                weeklySales
+                weeklySales,
+                recentOrders,
+                recentBooks
             });
         }
     }
 }
+
+
