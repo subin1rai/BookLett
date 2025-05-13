@@ -35,7 +35,8 @@ const DealsDiscount = ({ bookId, onClose }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 max-w-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+
       <h2 className="text-xl font-medium text-gray-700 mb-6">Add Discount</h2>
 
       <form onSubmit={handleSubmit}>
