@@ -15,6 +15,7 @@
           "Microsoft.AspNetCore.SignalR.Client": "9.0.4",
           "Microsoft.EntityFrameworkCore": "8.0.15",
           "Microsoft.EntityFrameworkCore.Tools": "8.0.15",
+          "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.21.0",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.11",
           "Swashbuckle.AspNetCore": "6.4.0"
         },
@@ -671,6 +672,7 @@
           }
         }
       },
+      "Microsoft.VisualStudio.Azure.Containers.Tools.Targets/1.21.0": {},
       "Mono.TextTemplating/2.2.1": {
         "dependencies": {
           "System.CodeDom": "4.4.0"
@@ -1658,6 +1660,13 @@
       "sha512": "sha512-Nug3rO+7Kl5/SBAadzSMAVgqDlfGjJZ0GenQrLywJ84XGKO0uRqkunz5Wyl0SDwcR71bAATXvSdbdzPrYRYKGw==",
       "path": "microsoft.openapi/1.2.3",
       "hashPath": "microsoft.openapi.1.2.3.nupkg.sha512"
+    },
+    "Microsoft.VisualStudio.Azure.Containers.Tools.Targets/1.21.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-8NudeHOE56YsY59HYY89akRMup8Ho+7Y3cADTGjajjWroXVU9RQai2nA6PfteB8AuzmRHZ5NZQB2BnWhQEul5g==",
+      "path": "microsoft.visualstudio.azure.containers.tools.targets/1.21.0",
+      "hashPath": "microsoft.visualstudio.azure.containers.tools.targets.1.21.0.nupkg.sha512"
     },
     "Mono.TextTemplating/2.2.1": {
       "type": "package",

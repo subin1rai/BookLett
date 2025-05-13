@@ -1,0 +1,8 @@
+﻿[build]
+builder = "dockerfile"
+dockerfilepath = "./BookLibrary/Dockerfile"
+
+[Deploy]
+startCommand = "./BookLibrary"
+restartPolicyType = "always"
+healthCheckPath = "/health"

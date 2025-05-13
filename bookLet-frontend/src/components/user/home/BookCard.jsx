@@ -11,13 +11,6 @@ const BookCard = ({ book, show, isSoon }) => {
 
   const [timeLeft, setTimeLeft] = useState(null);
   const [showSale, setShowSale] = useState(false);
-
-  const { addToCart, fetchWishlist, setWishlist, checkLogged } =
-    useContext(AppContext);
-
-  console.log("books", book);
-
-
   const { addToCart, fetchWishlist, setWishlist, checkLogged } = useContext(AppContext);
 
   const token = localStorage.getItem("token");

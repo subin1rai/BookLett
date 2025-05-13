@@ -11,7 +11,7 @@ const ComingSoon = () => {
   return comingSoon ? (
     <div className="mb-10">
       <div className="flex flex-row items-center justify-between">
-        <h1 className="font-bold text-2xl mb-4">Books Coming Soon</h1>
+        <h1 className="font-bold text-2xl mb-4">Coming Soon</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mt-5">

@@ -12,14 +12,14 @@ const colorOptions = [
     name: "Blue",
     value: "blue",
     bg: "bg-blue-100",
-    text: "text-blue-800",
+    text: "text-[#1198F8]",
     preview: "bg-blue-500",
   },
   {
     name: "Green",
     value: "green",
     bg: "bg-green-100",
-    text: "text-green-800",
+    text: "text-[#7BEC7A]",
     preview: "bg-green-500",
   },
   {

@@ -8,6 +8,10 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5202";
+builder.WebHost.UseUrls($"http://*:{port}");
+
+builder.Services.AddHealthChecks();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -108,6 +112,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseStaticFiles();
+app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
 app.UseAuthorization();
