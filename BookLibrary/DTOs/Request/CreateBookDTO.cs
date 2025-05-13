@@ -38,7 +38,7 @@ public class CreateBookDTO
     public DateTime PublicationDate { get; set; }
 
     // [Required(ErrorMessage = "Price is required")]
-    public int Price { get; set; }
+    public int Price { get; set; }= 0;
 
     // [Required(ErrorMessage = "Quantity is required")]
     // [Range(1, int.MaxValue, ErrorMessage = "Quantity must be greater than 0")]

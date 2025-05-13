@@ -74,6 +74,9 @@ public class Book
 
     public ICollection<WhiteList> Whitelists { get; set; }
     public ICollection<CartItem> AddtoCarts { get; set; }  
+
+    public ICollection<Rating> Reviews { get; set; }
+
   
 }
 

@@ -25,13 +25,13 @@ namespace BookLibrary.Controllers
         //pagination implemented 
         [HttpGet("all")]
         public async Task<ActionResult> GetAllBooks(
-     [FromQuery] int page = 1,
-     [FromQuery] int pageSize = 10,
-     [FromQuery] string? search = null,
-     [FromQuery] string? genre = null,
-     [FromQuery] string? author = null,
-     [FromQuery] string? sortBy = "title", 
-     [FromQuery] bool sortDesc = false)
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? genre = null,
+            [FromQuery] string? author = null,
+            [FromQuery] string? sortBy = "title",
+            [FromQuery] bool sortDesc = false)
         {
             if (page <= 0 || pageSize <= 0)
             {
@@ -43,17 +43,19 @@ namespace BookLibrary.Controllers
                 });
             }
 
-            // Start with all books
-            IQueryable<Book> query = _context.Books;
+            // Include ratings and users
+            var query = _context.Books
+                .Include(b => b.Reviews)
+                    .ThenInclude(r => r.User) // Ensure User nav is present in Rating
+                .AsQueryable();
 
-            // Apply search (in title or author)
+            // Filtering
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = query.Where(b =>
                     b.Title.ToLower().Contains(search.ToLower()) ||
                     b.Author.ToLower().Contains(search.ToLower()));
             }
-
 
             if (!string.IsNullOrWhiteSpace(genre))
             {
@@ -65,7 +67,7 @@ namespace BookLibrary.Controllers
                 query = query.Where(b => b.Author.ToLower() == author.ToLower());
             }
 
-            // Apply sorting
+            // Sorting
             query = sortBy.ToLower() switch
             {
                 "price" => sortDesc ? query.OrderByDescending(b => b.Price) : query.OrderBy(b => b.Price),
@@ -81,28 +83,44 @@ namespace BookLibrary.Controllers
                 .Take(pageSize)
                 .ToListAsync();
 
-            var bookDtos = books.Select(b => new BookDTO
+            var bookDtos = books.Select(b => new
             {
-                BookId = b.BookId,
-                Title = b.Title,
-                Author = b.Author,
-                Genre = b.Genre,
-                ISBN = b.ISBN,
-                Description = b.Description,
-                Publisher = b.Publisher,
-                PublicationDate = b.PublicationDate,
-                Price = b.Price,
-                Quantity = b.Quantity,
-                Language = b.Language,
-                Discount = b.Discount,
-                Format = b.Format,
-                ImageUrl = b.ImageUrl,
-                AvailableInLibrary = b.AvailableInLibrary,
-                IsOnSale = b.IsOnSale,
-                StartTime = b.StartTime,
-                EndTime = b.EndTime,
-                CreatedAt = b.CreatedAt
-            }).ToList();
+                b.BookId,
+                b.Title,
+                b.Author,
+                b.Genre,
+                b.ISBN,
+                b.Description,
+                b.Publisher,
+                b.PublicationDate,
+                b.Price,
+                b.Quantity,
+                b.Language,
+                b.Discount,
+                b.Format,
+                b.ImageUrl,
+                b.AvailableInLibrary,
+                b.IsOnSale,
+                b.StartTime,
+                b.EndTime,
+                b.CreatedAt,
+
+                // ⭐ Average Stars
+                AverageStars = b.Reviews != null && b.Reviews.Any()
+                    ? Math.Round(b.Reviews.Average(r => r.Stars), 1)
+                    : 0,
+
+                // 💬 All Comments + Reviews
+                Reviews = b.Reviews?.Select(r => new ReviewDTO
+                {
+                    ReviewId = r.ReviewId,
+                    BookId = r.BookId,
+                    UserId = r.UserId,
+                    Username = r.User != null ? r.User.Username : "Anonymous",
+                    Stars = r.Stars,
+                    Comment = r.Comment
+                }).ToList() ?? new List<ReviewDTO>()
+            });
 
             return Ok(new
             {
@@ -113,12 +131,13 @@ namespace BookLibrary.Controllers
                 {
                     currentPage = page,
                     pageSize = pageSize,
-                    totalPages = totalPages,
+                    totalPages,
                     totalItems = totalBooks
                 },
                 data = bookDtos
             });
         }
+
 
 
         [HttpPost("addWishlist")]
@@ -316,60 +335,60 @@ namespace BookLibrary.Controllers
         }
 
         [HttpGet("bestSeller")]
-public async Task<IActionResult> GetBestSellers()
-{
-    var bestSellingBooks = await _context.OrderItems
-        .GroupBy(oi => oi.BookId)
-        .Select(group => new
+        public async Task<IActionResult> GetBestSellers()
         {
-            BookId = group.Key,
-            OrderCount = group.Count()
-        })
-        .OrderByDescending(g => g.OrderCount)
-        .Take(10) // Top 10 bestsellers, you can adjust this
-        .ToListAsync();
+            var bestSellingBooks = await _context.OrderItems
+                .GroupBy(oi => oi.BookId)
+                .Select(group => new
+                {
+                    BookId = group.Key,
+                    OrderCount = group.Count()
+                })
+                .OrderByDescending(g => g.OrderCount)
+                .Take(10) // Top 10 bestsellers, you can adjust this
+                .ToListAsync();
 
-    var bookIds = bestSellingBooks.Select(b => b.BookId).ToList();
+            var bookIds = bestSellingBooks.Select(b => b.BookId).ToList();
 
-    var books = await _context.Books
-        .Where(b => bookIds.Contains(b.BookId))
-        .ToListAsync();
+            var books = await _context.Books
+                .Where(b => bookIds.Contains(b.BookId))
+                .ToListAsync();
 
-    var result = bestSellingBooks
-        .Join(books, b => b.BookId, book => book.BookId, (b, book) => new
-        {
-            book = new BookDTO
+            var result = bestSellingBooks
+                .Join(books, b => b.BookId, book => book.BookId, (b, book) => new
+                {
+                    book = new BookDTO
+                    {
+                        BookId = book.BookId,
+                        Title = book.Title,
+                        Author = book.Author,
+                        Genre = book.Genre,
+                        ISBN = book.ISBN,
+                        Description = book.Description,
+                        Publisher = book.Publisher,
+                        PublicationDate = book.PublicationDate,
+                        Price = book.Price,
+                        Quantity = book.Quantity,
+                        Language = book.Language,
+                        Discount = book.Discount,
+                        Format = book.Format,
+                        ImageUrl = book.ImageUrl,
+                        AvailableInLibrary = book.AvailableInLibrary,
+                        IsOnSale = book.IsOnSale
+                    },
+                    orderCount = b.OrderCount
+                })
+                .OrderByDescending(x => x.orderCount)
+                .ToList();
+
+            return Ok(new
             {
-                BookId = book.BookId,
-                Title = book.Title,
-                Author = book.Author,
-                Genre = book.Genre,
-                ISBN = book.ISBN,
-                Description = book.Description,
-                Publisher = book.Publisher,
-                PublicationDate = book.PublicationDate,
-                Price = book.Price,
-                Quantity = book.Quantity,
-                Language = book.Language,
-                Discount = book.Discount,
-                Format = book.Format,
-                ImageUrl = book.ImageUrl,
-                AvailableInLibrary = book.AvailableInLibrary,
-                IsOnSale = book.IsOnSale
-            },
-            orderCount = b.OrderCount
-        })
-        .OrderByDescending(x => x.orderCount)
-        .ToList();
-
-    return Ok(new
-    {
-        status = "success",
-        code = 200,
-        message = "Top selling books fetched successfully",
-        data = result
-    });
-}
+                status = "success",
+                code = 200,
+                message = "Top selling books fetched successfully",
+                data = result
+            });
+        }
 
     }
 }
