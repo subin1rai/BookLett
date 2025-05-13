@@ -266,38 +266,48 @@ namespace BookLibrary.Controllers
                 });
             }
         }
-        [HttpDelete("remove/{bookId}")]
-        [Authorize(Policy = "RequireUserRole")]
-        public async Task<IActionResult> RemoveWishlist(Guid bookId)
+       
+[HttpDelete("remove/{bookId}")]
+[Authorize(Policy = "RequireUserRole")]
+public async Task<IActionResult> RemoveWishlist(Guid bookId)
+{
+    // Find the user claim
+    var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+    // If no user claim is found, return Unauthorized response
+    if (userClaim == null)
+        return Unauthorized("Invalid! Token is missing");
+
+    // Get the user ID from the claim
+    var userId = Guid.Parse(userClaim.Value);
+
+    // Find the wishlist entry that matches the user and book
+    var wishlist = await _context.Whitelists
+        .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == bookId);
+
+    // If the wishlist entry is not found, return a response indicating the book is not in the wishlist
+    if (wishlist == null)
+    {
+        return Ok(new
         {
-            var userClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            status = false,
+            code = 200,
+            message = "Book is not in the wishlist"
+        });
+    }
 
-            if (userClaim == null)
-                return Unauthorized("Invalid! Token is missing");
+    // Remove the item from the wishlist
+    _context.Whitelists.Remove(wishlist);
+    await _context.SaveChangesAsync();
 
-            var userId = Guid.Parse(userClaim.Value);
-
-            var wishlist = await _context.Whitelists
-            .FirstOrDefaultAsync(w => w.UserId == userId && w.BookId == bookId);
-
-            {
-                return Ok(new
-                {
-                    status = false,
-                    code = 200,
-                    message = "Book is not in the wishlist"
-                });
-            }
-
-            _context.Whitelists.Remove(wishlist);
-            await _context.SaveChangesAsync();
-            return Ok(new
-            {
-                status = true,
-                statusCode = 200,
-                message = "Book removed from wishlist successfully"
-            });
-        }
+    // Return success message after removing the book
+    return Ok(new
+    {
+        status = true,
+        statusCode = 200,
+        message = "Book removed from wishlist successfully"
+    });
+}
 
         [HttpGet("bookByAuthor/{name}")]
         public async Task<ActionResult<IEnumerable<BookDTO>>> GetBooksByAuthor(string name)
