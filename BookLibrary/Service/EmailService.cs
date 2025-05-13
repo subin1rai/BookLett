@@ -14,7 +14,7 @@ public class EmailServices : IEmailService
 
     public async Task SendEmail(string receptor, string subject, string body)
     {
-        var apiKey = Environment.GetEnvironmentVariable("SendGrid:ApiKey");
+        var apiKey = "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";
         var client = new SendGridClient(apiKey);
 
         var from = new EmailAddress("onsiteapp.np@gmail.com", "Booklett");

@@ -107,6 +107,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<TokenServices>();
 builder.Services.AddTransient<IEmailService, EmailServices>();
 builder.Services.AddSingleton<CloudinaryService>();
+// var apiKey = builder.Configuration["SendGrid:ApiKey"];
 
 
 var app = builder.Build();
