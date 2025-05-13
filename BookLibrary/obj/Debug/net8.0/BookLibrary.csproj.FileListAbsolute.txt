@@ -277,3 +277,5 @@ C:\Users\subin\Desktop\BookLett\BookLibrary\obj\Debug\net8.0\refint\BookLibrary.
 C:\Users\subin\Desktop\BookLett\BookLibrary\obj\Debug\net8.0\BookLibrary.pdb
 C:\Users\subin\Desktop\BookLett\BookLibrary\obj\Debug\net8.0\BookLibrary.genruntimeconfig.cache
 C:\Users\subin\Desktop\BookLett\BookLibrary\obj\Debug\net8.0\ref\BookLibrary.dll
+C:\Users\subin\Desktop\BookLett\BookLibrary\bin\Debug\net8.0\SendGrid.dll
+C:\Users\subin\Desktop\BookLett\BookLibrary\bin\Debug\net8.0\StarkbankEcdsa.dll

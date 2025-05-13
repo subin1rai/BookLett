@@ -15,13 +15,20 @@ public class EmailServices : IEmailService
     public async Task SendEmail(string receptor, string subject, string body)
     {
         var apiKey = _config["SendGrid:ApiKey"];
-        var client = new SendGridClient(apiKey);
+        Console.WriteLine("🔐 SendGrid API Key Length: " + (apiKey?.Length ?? 0));  // Debug output
 
-        var from = new EmailAddress("onsiteapp.np@gmail.com", "Booklett");
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            Console.WriteLine("❌ API Key not found. Check environment variables or config setup.");
+            return;
+        }
+
+        var client = new SendGridClient(apiKey);
+        var from = new EmailAddress("your_verified@yourdomain.com", "Booklett"); // ✅ Must be verified sender
         var to = new EmailAddress(receptor);
         var msg = MailHelper.CreateSingleEmail(from, to, subject, body, body);
         var response = await client.SendEmailAsync(msg);
 
-        Console.WriteLine($"SendGrid Status: {response.StatusCode}");
+        Console.WriteLine($"📬 SendGrid Status: {response.StatusCode}");
     }
 }
