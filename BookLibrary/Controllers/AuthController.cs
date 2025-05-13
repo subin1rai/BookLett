@@ -10,7 +10,7 @@ namespace BookLibrary.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-   public class AuthController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly AuthDbContext _context;
         private readonly TokenServices _token;
@@ -23,69 +23,90 @@ namespace BookLibrary.Controllers
             _token = token;
             _emailService = emailService;
         }
-    
 
-    [HttpPost("register")]
-    public async Task<ActionResult<UserDTO>> Register(RegisterDTO register){
-         // Check if username already exists
-            if (await _context.Users.AnyAsync(u => u.Username == register.Username))
+
+        [HttpPost("register")]
+        public async Task<ActionResult<UserDTO>> Register(RegisterDTO register)
+        {
+            try
             {
-                return BadRequest("Username is already taken");
-            }
+                Console.WriteLine("📩 Register endpoint hit");
 
-            // Check if email already exists
-            if (await _context.Users.AnyAsync(u => u.Email == register.Email))
-            {
-                return BadRequest("Email is already registered");
-            }
-
-            //RANDOMLY GENERATE VERIFY CODE 5 DIGITS
-            Random random = new Random();
-            int verifyCode = random.Next(10000, 99999);
-
-
-            // Create new user
-            var user = new User
-            {
-                Username = register.Username,
-                Email = register.Email,
-                VerificationCode = verifyCode,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(register.Password)
-            };
-
-            // Check if this is the first user, if so, make them an Admin
-            if (!await _context.Users.AnyAsync())
-            {
-                user.Role = "Admin";
-            }
-
-             var receptor = user.Email;
-            var subject = $"Verfication code BOOKLETT";
-            var body = $"Your otp is {verifyCode}";
-           
-            await _emailService.SendEmail(receptor, subject, body);
-
-            // Add user to database
-            _context.Users.Add(user);
-
-            await _context.SaveChangesAsync();
-            // Return user DTO with token
-            return Ok(new{
-                status = "success",
-                message = "User Registered successful",
-                statusCode = 200,
-                user = new UserDTO
+                // Check if username exists
+                if (await _context.Users.AnyAsync(u => u.Username == register.Username))
                 {
-                    Id = user.Id,
-                    Username = user.Username,
-                    Email = user.Email,
-                    Role = user.Role
-                },
-            });
-    }
-    
+                    Console.WriteLine("⚠️ Username already taken");
+                    return BadRequest("Username is already taken");
+                }
 
-     // POST: api/Auth/login
+                // Check if email exists
+                if (await _context.Users.AnyAsync(u => u.Email == register.Email))
+                {
+                    Console.WriteLine("⚠️ Email already registered");
+                    return BadRequest("Email is already registered");
+                }
+
+                // Generate 5-digit verification code
+                var verifyCode = new Random().Next(10000, 99999);
+
+                var user = new User
+                {
+                    Username = register.Username,
+                    Email = register.Email,
+                    VerificationCode = verifyCode,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(register.Password),
+                    Role = "User"
+                };
+
+                // Make first user an Admin
+                if (!await _context.Users.AnyAsync())
+                {
+                    user.Role = "Admin";
+                    Console.WriteLine("👑 First user assigned as Admin");
+                }
+
+                // Send verification email
+                try
+                {
+                    string subject = "Verification Code - Booklett";
+                    string body = $"Your OTP is {verifyCode}";
+                    await _emailService.SendEmail(user.Email, subject, body);
+                    Console.WriteLine("✅ Verification email sent");
+                }
+                catch (Exception emailEx)
+                {
+                    Console.WriteLine($"❌ Email sending failed: {emailEx.Message}");
+                    // Continue registration even if email fails
+                }
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+
+                Console.WriteLine("✅ User saved to database");
+
+                return Ok(new
+                {
+                    status = "success",
+                    message = "User registered successfully",
+                    statusCode = 200,
+                    user = new UserDTO
+                    {
+                        Id = user.Id,
+                        Username = user.Username,
+                        Email = user.Email,
+                        Role = user.Role
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"🔥 Unexpected error in Register: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                return StatusCode(500, new { error = "An unexpected error occurred." });
+            }
+        }
+
+        // POST: api/Auth/login
         [HttpPost("login")]
         public async Task<ActionResult<object>> Login(LoginDTO loginDto)
         {
@@ -111,7 +132,7 @@ namespace BookLibrary.Controllers
 
             // Generate JWT token
             var token = _token.GenerateToken(user);
-            
+
 
             // Return token and user information
             return Ok(new
@@ -169,5 +190,5 @@ namespace BookLibrary.Controllers
             });
         }
 
-}
+    }
 }
