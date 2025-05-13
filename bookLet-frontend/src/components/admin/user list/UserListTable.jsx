@@ -1,5 +1,12 @@
-import { Calendar, Eye, ChevronLeft, ChevronRight, CheckCircle, XCircle } from "lucide-react";
-import React, { useState } from "react";
+import {
+  Calendar,
+  Eye,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
+import apiClient from "../../../api/axios";
 
 const UserListTable = ({ users, totalPages, currentPage, onPageChange }) => {
   const getPaginationRange = () => {
@@ -43,12 +50,17 @@ const UserListTable = ({ users, totalPages, currentPage, onPageChange }) => {
   };
 
   const renderVerificationStatus = (isVerified) => {
-    const verified = typeof isVerified === 'string' 
-      ? isVerified.toLowerCase() === 'true' 
-      : Boolean(isVerified);
-    
+    const verified =
+      typeof isVerified === "string"
+        ? isVerified.toLowerCase() === "true"
+        : Boolean(isVerified);
+
     return (
-      <div className={`flex items-center gap-1 ${verified ? 'text-blue-600' : 'text-red-600'}`}>
+      <div
+        className={`flex items-center gap-1 ${
+          verified ? "text-blue-600" : "text-red-600"
+        }`}
+      >
         {verified ? (
           <>
             <CheckCircle size={16} className="text-blue-600" />
@@ -62,6 +74,27 @@ const UserListTable = ({ users, totalPages, currentPage, onPageChange }) => {
         )}
       </div>
     );
+  };
+
+  const handleRoleChange = async (userId, newRole, currentRole) => {
+    if (newRole === currentRole) return;
+    console.log(newRole);
+
+    try {
+      const token = localStorage.getItem("token");
+      const { data } = await apiClient.put(
+        `/user/updaterole/${userId}`,
+        JSON.stringify(newRole),
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating role:", error);
+    }
   };
 
   return (
@@ -92,7 +125,16 @@ const UserListTable = ({ users, totalPages, currentPage, onPageChange }) => {
                     {user.email}
                   </td>
                   <td className="py-4 px-4 max-w-xs overflow-hidden whitespace-nowrap text-ellipsis">
-                    {user.role}
+                    <select
+                      value={user.role}
+                      onChange={(e) =>
+                        handleRoleChange(user.id, e.target.value, user.role)
+                      }
+                      className="border rounded px-2 py-1 text-sm"
+                    >
+                      <option value="Staff">Staff</option>
+                      <option value="User">User</option>
+                    </select>
                   </td>
 
                   <td className="py-4 px-4 text-sm text-gray-600 flex items-center gap-1">
