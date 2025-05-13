@@ -24,7 +24,7 @@ public class EmailServices : IEmailService
         }
 
         var client = new SendGridClient(apiKey);
-        var from = new EmailAddress("your_verified@yourdomain.com", "Booklett"); // ✅ Must be verified sender
+        var from = new EmailAddress("np05cp4a220125@iic.edu.np", "Subin Rai");
         var to = new EmailAddress(receptor);
         var msg = MailHelper.CreateSingleEmail(from, to, subject, body, body);
         var response = await client.SendEmailAsync(msg);
