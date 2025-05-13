@@ -1,34 +1,28 @@
-using System;
-using System.Net;
-using System.Net.Mail;
-namespace BookLibrary.Service;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using Microsoft.Extensions.Configuration;
+using BookLibrary.Service;
 
 public class EmailServices : IEmailService
 {
-    public readonly IConfiguration _configuration;
+    private readonly IConfiguration _config;
 
-    public EmailServices(IConfiguration configuration)
+    public EmailServices(IConfiguration config)
     {
-        _configuration = configuration;
+        _config = config;
     }
 
-    public async Task SendEmail(string receptor, string subject, string body)
+    public async Task SendEmail(string toEmail, string subject, string body)
     {
-        var email = _configuration.GetValue<string>("EMAIL_CONFIGURATION:EMAIL");
-        var password = _configuration.GetValue<string>("EMAIL_CONFIGURATION:PASSWORD");
-        var Host = _configuration.GetValue<string>("EMAIL_CONFIGURATION:HOST");
-        var port = _configuration.GetValue<int>("EMAIL_CONFIGURATION:PORT");
+        var apiKey = _config["SendGrid:ApiKey"];
+        var client = new SendGridClient(apiKey);
 
+        var from = new EmailAddress("your_verified_sender@example.com", "Booklett");
+        var to = new EmailAddress(toEmail);
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, body, body);
 
-        var smtpClient = new SmtpClient(Host, port);
-        smtpClient.EnableSsl = true;
-        smtpClient.UseDefaultCredentials = false;
-        smtpClient.Credentials = new NetworkCredential(email, password);
+        var response = await client.SendEmailAsync(msg);
 
-        var message = new MailMessage(email!, receptor, subject, body)
-        {
-            IsBodyHtml = true // 
-        }; 
-        await smtpClient.SendMailAsync(message);
+        Console.WriteLine($"SendGrid Status: {response.StatusCode}");
     }
 }
