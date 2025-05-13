@@ -41,7 +41,7 @@ const StaffHeader = () => {
         </div>
         <div className="flex flex-row items-center gap-3">
           <img className="h-[40px]" src={images.user_icon} alt="user" />
-          <div className="text-black">staff</div>
+          <div className="text-black">Staff</div>
         </div>
       </div>
     </div>

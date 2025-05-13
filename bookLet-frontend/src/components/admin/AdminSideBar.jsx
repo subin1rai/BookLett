@@ -21,8 +21,6 @@ const AdminSidebar = () => {
     { name: "Users", path: "/admin/users", icons: User },
     { name: "Staff", path: "/admin/staff", icons: Users },
     { name: "Banners", path: "/admin/banners", icons: ScrollText },
-    { name: "Reports", path: "/admin/reports", icons: ListCheck },
-    { name: "Settings", path: "/admin/settings", icons: Settings },
   ];
 
   return (

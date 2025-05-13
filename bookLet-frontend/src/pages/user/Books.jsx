@@ -3,12 +3,14 @@ import FilteringSection from "../../components/user/book list/FilterSection";
 import Loading from "../../components/basic components/Loading";
 import BookCard from "../../components/user/home/BookCard";
 import apiClient from "../../api/axios";
+import SearchComponent from "../../components/basic components/SearchComponent";
 
 const BookList = () => {
   const [selectedGenres, setSelectedGenres] = useState("");
   const [selectedSort, setSelectedSort] = useState("");
   const [selectedRatings, setSelectedRatings] = useState([]);
   const [allBooks, setAllBooks] = useState([]);
+    const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const [pageSize] = useState(8);
   const [totalPages, setTotalPages] = useState(1);
@@ -42,7 +44,7 @@ const BookList = () => {
         sortDesc,
       });
 
-      const { data } = await apiClient.get(`/book/all?${params.toString()}`, {
+      const { data } = await apiClient.get(`/book/all?${params.toString()}&search=${query}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,14 +78,22 @@ const BookList = () => {
           setSelectedRatings={setSelectedRatings}
         />
         <div className="w-full">
-          <div className="text-3xl font-bold mb-4">Books</div>
+          <div className="flex flex-row justify-between">
+            <div className="text-3xl font-bold mb-4">Books</div>
+            <SearchComponent
+              value={query}
+              onChange={setQuery}
+              onSubmit={fetchBooks}
+              placeholder="Search book by names..."
+            />
+          </div>
           <p className="text-gray-600 text-sm mb-2">
             Showing page {page} of {totalPages} — Total books: {totalItems}
           </p>
           <hr />
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mt-7">
             {allBooks.map((book) => (
-              <BookCard key={book.bookId} book={book} show={true}/>
+              <BookCard key={book.bookId} book={book} show={true} />
             ))}
           </div>
 
