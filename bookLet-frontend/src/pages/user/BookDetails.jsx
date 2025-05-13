@@ -5,6 +5,8 @@ import BookToCart from "../../components/user/book details/BookToCart";
 import RatingReview from "../../components/user/book details/RatingReview";
 import apiClient from "../../api/axios";
 import BookCard from "../../components/user/home/BookCard";
+import AddReviewForm from "../../components/user/book details/AddReviewForm";
+import { toast } from "react-toastify";
 
 const BookDetails = () => {
   const { state } = useLocation();
@@ -13,16 +15,44 @@ const BookDetails = () => {
   const [reviews, setReviews] = useState([]);
   const [similar, setSimilar] = useState([]);
 
+  const onAddReview = async ({ rating, review }) => {
+    try {
+      const payload = {
+        bookId: bookDetail.bookId,
+        Stars: rating,
+        Comment: review,
+      };
+
+      console.log(payload);
+
+      const { data } = await apiClient.post("/review/addReview", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (data.statusCode === 200) {
+        toast.success("Review submitted successfully!");
+        setReviews((prev) => [data.data, ...prev]); // Update UI without refetch
+      } else {
+        toast.error(data.message || "Something went wrong");
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to submit review");
+    }
+  };
+
   const fetchReview = async () => {
     try {
       const { data } = await apiClient.get(
         `/review/getReviews/${bookDetail.bookId}`
       );
-      console.log(data.data);
-      if (data.statusCode == 200) {
-        setReviews(data.data);
+      console.log(data);
+      if (data) {
+        setReviews(data);
       }
-      if (data.statusCode == 400) {
+      if (!data) {
+        setReviews([]);
       }
     } catch (error) {
       console.log(error.message);
@@ -67,15 +97,20 @@ const BookDetails = () => {
       {/* Reviews section */}
       <div className="mb-8">
         <h1 className="font-semibold text-2xl mb-4">Rating and Reviews</h1>
-        {reviews.length === 0 ? (
-          <p>No reviews found.</p>
-        ) : (
-          reviews
-            .slice(0, 5)
-            .map((review) => (
-              <RatingReview key={review.reviewId} review={review} />
-            ))
-        )}
+        <div className="flex flex-col">
+          <div>
+            {reviews.length === 0 ? (
+              <p>No reviews found.</p>
+            ) : (
+              reviews
+                .slice(0, 5)
+                .map((review) => (
+                  <RatingReview key={review.reviewId} review={review} />
+                ))
+            )}
+          </div>
+          <AddReviewForm onSubmit={onAddReview} />
+        </div>
       </div>
 
       {/* More by author section */}

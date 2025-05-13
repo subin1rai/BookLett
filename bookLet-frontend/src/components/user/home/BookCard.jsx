@@ -6,14 +6,20 @@ import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { AppContext } from "../../../context/AppContext";
 
-const BookCard = ({ book }) => {
+const BookCard = ({ book, show, isSoon }) => {
   const [wish, setWish] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(null);
   const [showSale, setShowSale] = useState(false);
+
+  const { addToCart, fetchWishlist, setWishlist, checkLogged } =
+    useContext(AppContext);
+
+  console.log("books", book);
+
+
   const { addToCart, fetchWishlist, setWishlist, checkLogged } = useContext(AppContext);
 
->>>>>>>>> Temporary merge branch 2
   const token = localStorage.getItem("token");
   const bookId = book.bookId;
 
@@ -105,13 +111,18 @@ const BookCard = ({ book }) => {
             setTimeLeft(null);
             clearInterval(interval);
           } else {
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const hours = Math.floor(
+              (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+            );
+            const minutes = Math.floor(
+              (distance % (1000 * 60 * 60)) / (1000 * 60)
+            );
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
             setTimeLeft(
-              `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(
-                seconds
-              ).padStart(2, "0")}`
+              `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+                2,
+                "0"
+              )}:${String(seconds).padStart(2, "0")}`
             );
           }
         }, 1000);
@@ -132,18 +143,19 @@ const BookCard = ({ book }) => {
       <div className="relative mb-2 ">
         <Link to={`/bookDetails/${book.bookId}`} state={{ book }}>
           <img
-            src={book.imageUrl? book.imageUrl : images.book2}
+            src={book.imageUrl ? book.imageUrl : images.book2}
             alt={book.title}
             className="w-full h-[386px] object-cover rounded-[20px]"
           />
         </Link>
 
         {/* Show dynamic On Sale badge with countdown */}
-        {showSale && timeLeft && (
-          
+        {show && showSale && timeLeft && (
           <div className="absolute top-0 rounded-br-2xl rounded-tl-2xl h-10 bg-web-primary ">
-            <img src={images.sale1} alt="" className="w-16 absolute z-40"  />
-            <h1 className="text-lg font-semibold text-web-offer pl-9 p-2 ">{timeLeft}</h1>
+            <img src={images.sale1} alt="" className="w-16 absolute z-40" />
+            <h1 className="text-lg font-semibold text-web-offer pl-9 p-2">
+              {timeLeft}
+            </h1>
           </div>
         )}
 
@@ -161,13 +173,15 @@ const BookCard = ({ book }) => {
       </div>
 
       {/* Rating */}
-      <div className="flex flex-row justify-between items-center gap-2 mb-1">
-        <div className="flex items-center justify-center bg-web-primary border border-gray-500 rounded-full p-1 h-6 w-14">
-          <Star className="h-4" />
-          <span className="text-xs font-bold ml-0.5">4.5</span>
+      {!isSoon && (
+        <div className="flex flex-row justify-between items-center gap-2 mb-1">
+          <div className="flex items-center justify-center bg-web-primary border border-gray-500 rounded-full p-1 h-6 w-14">
+            <Star className="h-4" />
+            <span className="text-xs font-bold ml-0.5">{book.averageStars}</span>
+          </div>
+          <span className="text-gray-500 text-sm">{book.reviews?.length ?? 0} reviews</span>
         </div>
-        <span className="text-gray-500 text-sm">140 Reviews</span>
-      </div>
+      )}
 
       {/* Author */}
       <div className="text-xs text-gray-500 mb-1">By {book.author}</div>
@@ -181,25 +195,45 @@ const BookCard = ({ book }) => {
 
       {/* Price */}
       <div className="mb-2">
-        <div className="text-xs text-gray-500 line-through">Rs {book.price}</div>
-        <div className="flex justify-between items-center">
-          <span className="font-bold">
-            Rs {book.price - (book.discount * book.price) / 100}
-          </span>
-        {showSale && (
-          <span className="text-orange-500 font-bold">{book.discount}% Off</span>
-        )}  
-        </div>
+        {!isSoon && (
+          <>
+            <div className="text-xs text-gray-500 line-through">
+              Rs {book.price}
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="font-bold">
+                Rs {book.price - (book.discount * book.price) / 100}
+              </span>
+              {showSale && (
+                <span className="text-orange-500 font-bold">
+                  {book.discount}% Off
+                </span>
+              )}
+            </div>
+          </>
+        )}
+        {isSoon && (
+          <div className="font-bold text-base">Rs {book.price}</div>
+        )}
       </div>
 
       {/* Add to Cart Button */}
-      <button
-        onClick={addCart}
-        className="bg-gray-600 text-xl font-semibold text-white py-2 px-4 rounded-full flex items-center justify-center gap-2"
-      >
-        Add To Cart
-        <img className="h-[28px]" src={images.addtoCart} alt="" />
-      </button>
+      {!isSoon ? (
+        <button
+          onClick={addCart}
+          className="bg-gray-600 text-xl font-semibold text-white py-2 px-4 rounded-full flex items-center justify-center gap-2"
+        >
+          Add To Cart
+          <img className="h-[28px]" src={images.addtoCart} alt="" />
+        </button>
+      ) : (
+        <button
+          disabled
+          className="bg-gray-400 text-xl font-semibold text-white py-2 px-4 rounded-full flex items-center justify-center gap-2 cursor-not-allowed"
+        >
+          Coming Soon
+        </button>
+      )}
     </div>
   );
 };

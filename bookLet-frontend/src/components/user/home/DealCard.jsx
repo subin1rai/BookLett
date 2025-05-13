@@ -12,6 +12,9 @@ const DealCard = ({ book }) => {
     useContext(AppContext);
   console.log(checkLogged());
 
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [showSale, setShowSale] = useState(false);
+
   const token = localStorage.getItem("token");
   const bookId = book.bookId;
   const checkWish = async () => {
@@ -91,6 +94,46 @@ const DealCard = ({ book }) => {
     }
   };
 
+  // On Sale Countdown Logic
+  useEffect(() => {
+    if (book.isOnSale && book.startTime && book.endTime) {
+      const now = new Date().getTime();
+      const start = new Date(book.startTime).getTime();
+      const end = new Date(book.endTime).getTime();
+
+      if (now >= start && now < end) {
+        setShowSale(true);
+
+        const interval = setInterval(() => {
+          const now = new Date().getTime();
+          const distance = end - now;
+
+          if (distance <= 0) {
+            setShowSale(false);
+            setTimeLeft(null);
+            clearInterval(interval);
+          } else {
+            const hours = Math.floor(
+              (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+            );
+            const minutes = Math.floor(
+              (distance % (1000 * 60 * 60)) / (1000 * 60)
+            );
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            setTimeLeft(
+              `${String(hours).padStart(2, "0")}:${String(minutes).padStart(
+                2,
+                "0"
+              )}:${String(seconds).padStart(2, "0")}`
+            );
+          }
+        }, 1000);
+
+        return () => clearInterval(interval);
+      }
+    }
+  }, [book.isOnSale, book.startTime, book.endTime]);
+
   useEffect(() => {
     if (checkLogged()) {
       checkWish();
@@ -108,6 +151,16 @@ const DealCard = ({ book }) => {
               className="h-[300px] w-[203px] object-cover rounded-xl"
             />
           </Link>
+
+          {/* Show dynamic On Sale badge with countdown */}
+        {showSale && timeLeft && (
+          
+          <div className="absolute top-0 rounded-br-2xl rounded-tl-2xl h-10 bg-web-primary ">
+            <img src={images.sale1} alt="" className="w-16 absolute z-40"  />
+            <h1 className="text-lg font-semibold text-web-offer pl-9 p-2 ">{timeLeft}</h1>
+          </div>
+        )}
+
           <div className="absolute top-2 right-2 rounded-full h-10 bg-web-background p-2">
             {wish ? (
               <button onClick={removeWish}>
