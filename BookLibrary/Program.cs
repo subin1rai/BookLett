@@ -28,8 +28,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            // .WithOrigins("https://booklett.netlify.app")
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins("https://booklett.netlify.app")
+            // .WithOrigins("http://localhost:5173")
             .AllowAnyHeader()
             .AllowAnyMethod()
              .AllowCredentials();
