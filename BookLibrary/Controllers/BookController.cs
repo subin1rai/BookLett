@@ -79,7 +79,7 @@ namespace BookLibrary.Controllers
 public async Task<ActionResult<IEnumerable<BookDTO>>> GetAllBooks()
 {
     var books = await _context.Books
-        .OrderByDescending(b => b.PublicationDate)
+        .OrderByDescending(b => b.CreatedAt)
         .ToListAsync();
 
     var bookDtos = books.Select(b => new BookDTO
