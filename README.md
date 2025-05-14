@@ -35,13 +35,11 @@ BookLett is a web-based application designed to turn a personal collection of bo
    cd BookLett
 
 2. **Set up the frontend:**
-  ```bash
   cd book-frontend
   npm install
   npm start
 
 3. **Set up for backend:**
-  ```bash
   cd backend
   dotnet restore
   dotnet run
