@@ -24,6 +24,7 @@ export default function MyOrders() {
   useEffect(() => {
     fetchOrders();
   }, []);
+
   const handleCancelOrder = async (orderId) => {
     try {
       const { data } = await apiClient.put(
@@ -37,13 +38,14 @@ export default function MyOrders() {
       );
       if (data.statusCode == 200) {
         toast.success(data.message);
+        fetchOrders();
       }
     } catch (error) {
       console.log("Error Cancelling Order");
     }
   };
 
-  return (
+  return orders && (
     <div className="px-24 bg-web-background mx-auto p-4">
       <div className="mb-6">
         <div className="">
