@@ -76,32 +76,35 @@ namespace BookLibrary.Controllers
         }
 
         [HttpGet("getallbooks")]
+public async Task<ActionResult<IEnumerable<BookDTO>>> GetAllBooks()
+{
+    var books = await _context.Books
+        .OrderByDescending(b => b.CreatedAt)
+        .ToListAsync();
 
-        public async Task<ActionResult<IEnumerable<BookDTO>>> GetAllBooks()
-        {
-            var books = await _context.Books.ToListAsync();
-            var bookDtos = books.Select(b => new BookDTO
-            {
-                BookId = b.BookId,
-                Title = b.Title,
-                Author = b.Author,
-                Genre = b.Genre,
-                ISBN = b.ISBN,
-                Description = b.Description,
-                Publisher = b.Publisher,
-                PublicationDate = b.PublicationDate,
-                Price = b.Price,
-                Quantity = b.Quantity,
-                Language = b.Language,
-                Discount = b.Discount,
-                Format = b.Format,
-                ImageUrl = b.ImageUrl,
-                AvailableInLibrary = b.AvailableInLibrary,
-                AwardWinners = b.AwardWinners,
-                IsOnSale = b.IsOnSale
-            }).ToList();
-            return Ok(bookDtos);
-        }
+    var bookDtos = books.Select(b => new BookDTO
+    {
+        BookId = b.BookId,
+        Title = b.Title,
+        Author = b.Author,
+        Genre = b.Genre,
+        ISBN = b.ISBN,
+        Description = b.Description,
+        Publisher = b.Publisher,
+        PublicationDate = b.PublicationDate,
+        Price = b.Price,
+        Quantity = b.Quantity,
+        Language = b.Language,
+        Discount = b.Discount,
+        Format = b.Format,
+        ImageUrl = b.ImageUrl,
+        AvailableInLibrary = b.AvailableInLibrary,
+        AwardWinners = b.AwardWinners,
+        IsOnSale = b.IsOnSale
+    }).ToList();
+
+    return Ok(bookDtos);
+}
 
         [HttpGet("getbookbyid/{id}")]
         [Authorize(Policy = "RequireAdminRole")]
