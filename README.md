@@ -33,3 +33,18 @@ BookLett is a web-based application designed to turn a personal collection of bo
    ```bash
    git clone https://github.com/subin1rai/BookLett.git
    cd BookLett
+
+2. **Set up the frontend:**
+  ```bash
+  cd book-frontend
+  npm install
+  npm start
+
+3. **Set up for backend:**
+  ```bash
+  cd backend
+  dotnet restore
+  dotnet run
+
+## Try Out the website
+https://booklett.netlify.app/
