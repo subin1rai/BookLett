@@ -24,120 +24,117 @@ namespace BookLibrary.Controllers
 
         //pagination implemented 
         [HttpGet("all")]
-        public async Task<ActionResult> GetAllBooks(
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 10,
-            [FromQuery] string? search = null,
-            [FromQuery] string? genre = null,
-            [FromQuery] string? author = null,
-            [FromQuery] string? sortBy = "title",
-            [FromQuery] bool sortDesc = false)
+public async Task<ActionResult> GetAllBooks(
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? search = null,
+    [FromQuery] string? genre = null,
+    [FromQuery] string? author = null,
+    [FromQuery] string? sortBy = "createdAt", // default to newest
+    [FromQuery] bool sortDesc = true) // default to descending
+{
+    if (page <= 0 || pageSize <= 0)
+    {
+        return BadRequest(new
         {
-            if (page <= 0 || pageSize <= 0)
-            {
-                return BadRequest(new
-                {
-                    status = "error",
-                    code = 400,
-                    message = "Page and pageSize must be greater than 0"
-                });
-            }
+            status = "error",
+            code = 400,
+            message = "Page and pageSize must be greater than 0"
+        });
+    }
 
-            // Include ratings and users
-            var query = _context.Books
-                .Include(b => b.Reviews)
-                    .ThenInclude(r => r.User) // Ensure User nav is present in Rating
-                .AsQueryable();
+    var query = _context.Books
+        .Include(b => b.Reviews)
+            .ThenInclude(r => r.User)
+        .AsQueryable();
 
-            // Filtering
-            if (!string.IsNullOrWhiteSpace(search))
-            {
-                query = query.Where(b =>
-                    b.Title.ToLower().Contains(search.ToLower()) ||
-                    b.Author.ToLower().Contains(search.ToLower()));
-            }
+    // Filtering
+    if (!string.IsNullOrWhiteSpace(search))
+    {
+        query = query.Where(b =>
+            b.Title.ToLower().Contains(search.ToLower()) ||
+            b.Author.ToLower().Contains(search.ToLower()));
+    }
 
-            if (!string.IsNullOrWhiteSpace(genre))
-            {
-                query = query.Where(b => b.Genre.ToLower() == genre.ToLower());
-            }
+    if (!string.IsNullOrWhiteSpace(genre))
+    {
+        query = query.Where(b => b.Genre.ToLower() == genre.ToLower());
+    }
 
-            if (!string.IsNullOrWhiteSpace(author))
-            {
-                query = query.Where(b => b.Author.ToLower() == author.ToLower());
-            }
+    if (!string.IsNullOrWhiteSpace(author))
+    {
+        query = query.Where(b => b.Author.ToLower() == author.ToLower());
+    }
 
-            // Sorting
-            query = sortBy.ToLower() switch
-            {
-                "price" => sortDesc ? query.OrderByDescending(b => b.Price) : query.OrderBy(b => b.Price),
-                "createdat" => sortDesc ? query.OrderByDescending(b => b.CreatedAt) : query.OrderBy(b => b.CreatedAt),
-                _ => sortDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title)
-            };
+    // Sorting
+    query = sortBy?.ToLower() switch
+    {
+        "price" => sortDesc ? query.OrderByDescending(b => b.Price) : query.OrderBy(b => b.Price),
+        "title" => sortDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title),
+        "createdat" => sortDesc ? query.OrderByDescending(b => b.CreatedAt) : query.OrderBy(b => b.CreatedAt),
+        _ => query.OrderByDescending(b => b.CreatedAt) // Default: newest to oldest
+    };
 
-            var totalBooks = await query.CountAsync();
-            var totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
+    var totalBooks = await query.CountAsync();
+    var totalPages = (int)Math.Ceiling(totalBooks / (double)pageSize);
 
-            var books = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+    var books = await query
+        .Skip((page - 1) * pageSize)
+        .Take(pageSize)
+        .ToListAsync();
 
-            var bookDtos = books.Select(b => new
-            {
-                b.BookId,
-                b.Title,
-                b.Author,
-                b.Genre,
-                b.ISBN,
-                b.Description,
-                b.Publisher,
-                b.PublicationDate,
-                b.Price,
-                b.Quantity,
-                b.Language,
-                b.Discount,
-                b.Format,
-                b.ImageUrl,
-                b.AvailableInLibrary,
-                b.IsOnSale,
-                b.StartTime,
-                b.EndTime,
-                b.CreatedAt,
+    var bookDtos = books.Select(b => new
+    {
+        b.BookId,
+        b.Title,
+        b.Author,
+        b.Genre,
+        b.ISBN,
+        b.Description,
+        b.Publisher,
+        b.PublicationDate,
+        b.Price,
+        b.Quantity,
+        b.Language,
+        b.Discount,
+        b.Format,
+        b.ImageUrl,
+        b.AvailableInLibrary,
+        b.IsOnSale,
+        b.StartTime,
+        b.EndTime,
+        b.CreatedAt,
 
-                // ⭐ Average Stars
-                AverageStars = b.Reviews != null && b.Reviews.Any()
-                    ? Math.Round(b.Reviews.Average(r => r.Stars), 1)
-                    : 0,
+        AverageStars = b.Reviews != null && b.Reviews.Any()
+            ? Math.Round(b.Reviews.Average(r => r.Stars), 1)
+            : 0,
 
-                // 💬 All Comments + Reviews
-                Reviews = b.Reviews?.Select(r => new ReviewDTO
-                {
-                    ReviewId = r.ReviewId,
-                    BookId = r.BookId,
-                    UserId = r.UserId,
-                    Username = r.User != null ? r.User.Username : "Anonymous",
-                    Stars = r.Stars,
-                    Comment = r.Comment
-                }).ToList() ?? new List<ReviewDTO>()
-            });
+        Reviews = b.Reviews?.Select(r => new ReviewDTO
+        {
+            ReviewId = r.ReviewId,
+            BookId = r.BookId,
+            UserId = r.UserId,
+            Username = r.User != null ? r.User.Username : "Anonymous",
+            Stars = r.Stars,
+            Comment = r.Comment
+        }).ToList() ?? new List<ReviewDTO>()
+    });
 
-            return Ok(new
-            {
-                status = "success",
-                code = 200,
-                message = "Books retrieved successfully",
-                pagination = new
-                {
-                    currentPage = page,
-                    pageSize = pageSize,
-                    totalPages,
-                    totalItems = totalBooks
-                },
-                data = bookDtos
-            });
-        }
-
+    return Ok(new
+    {
+        status = "success",
+        code = 200,
+        message = "Books retrieved successfully",
+        pagination = new
+        {
+            currentPage = page,
+            pageSize = pageSize,
+            totalPages,
+            totalItems = totalBooks
+        },
+        data = bookDtos
+    });
+}
 
 
         [HttpPost("addWishlist")]
