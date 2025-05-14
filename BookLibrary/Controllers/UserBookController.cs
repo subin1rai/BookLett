@@ -23,7 +23,7 @@ namespace BookLibrary.Controllers
 
 
         //pagination implemented 
-        [HttpGet("all")]
+       [HttpGet("all")]
 public async Task<ActionResult> GetAllBooks(
     [FromQuery] int page = 1,
     [FromQuery] int pageSize = 10,
@@ -72,6 +72,11 @@ public async Task<ActionResult> GetAllBooks(
         "price" => sortDesc ? query.OrderByDescending(b => b.Price) : query.OrderBy(b => b.Price),
         "title" => sortDesc ? query.OrderByDescending(b => b.Title) : query.OrderBy(b => b.Title),
         "createdat" => sortDesc ? query.OrderByDescending(b => b.CreatedAt) : query.OrderBy(b => b.CreatedAt),
+        "newestarrivals" => query.OrderByDescending(b => b.CreatedAt).Where(b => b.CreatedAt >= DateTime.Now.AddMonths(-1)),
+        "newrelease" => query.OrderByDescending(b => b.CreatedAt).Where(b => b.CreatedAt >= DateTime.Now.AddMonths(-3)),
+        "dealsanddiscount" => query.Where(b => b.StartTime <= DateTime.Now && b.EndTime >= DateTime.Now && b.IsOnSale),
+        "bestseller" => query.Where(b => b.BestSeller),
+        "awardwinner" => query.Where(b => b.AwardWinner),
         _ => query.OrderByDescending(b => b.CreatedAt) // Default: newest to oldest
     };
 
