@@ -75,8 +75,7 @@ public async Task<ActionResult> GetAllBooks(
         "newestarrivals" => query.OrderByDescending(b => b.CreatedAt).Where(b => b.CreatedAt >= DateTime.Now.AddMonths(-1)),
         "newrelease" => query.OrderByDescending(b => b.CreatedAt).Where(b => b.CreatedAt >= DateTime.Now.AddMonths(-3)),
         "dealsanddiscount" => query.Where(b => b.StartTime <= DateTime.Now && b.EndTime >= DateTime.Now && b.IsOnSale),
-        "bestseller" => query.Where(b => b.BestSeller),
-        "awardwinner" => query.Where(b => b.AwardWinner),
+        "awardwinner" => query.Where(b => b.AwardWinners),
         _ => query.OrderByDescending(b => b.CreatedAt) // Default: newest to oldest
     };
 
